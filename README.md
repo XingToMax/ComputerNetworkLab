@@ -283,7 +283,7 @@ ii.            产生8个进程，其中两个代表交换机，6个代表主机
 
 完成下面拓扑
 
-![1554379283577](https://github.com/XingToMax/ComputerNetworkLab/images/1554379283577.png)
+![1554379283577](https://github.com/XingToMax/ComputerNetworkLab/blob/master/images/1554379283577.png?raw=true)
 
 iii.         任何一个主机可以通过Socket发送数据给另外一个
 
@@ -306,7 +306,7 @@ ii.            产生5个进程，每个进程代表一个路由器，保存有�
 
 iii.         网络的拓扑如下
 
-![1554379268631](https://github.com/XingToMax/ComputerNetworkLab/images/1554379268631.png) 
+![1554379268631](https://github.com/XingToMax/ComputerNetworkLab/blob/master/images/1554379268631.png?raw=true) 
 
 iv.          可以人工指定哪个网络崩溃了
 
@@ -331,7 +331,7 @@ ii.            产生4个进程，每个进程代表一个路由器，保存有�
 
 iii.         网络的拓扑如下
 
-![1554379224798](https://github.com/XingToMax/ComputerNetworkLab/images/1554379224798.png) 
+![](https://github.com/XingToMax/ComputerNetworkLab/blob/master/images/1554379224798.png?raw=true)
 
 iv.          每隔1分钟，进程交换自己的路由表
 
@@ -433,7 +433,7 @@ vi.          NAT代理主机获取报文，找到A的信息，替换IP地址和�
 
 要求学生掌握Socket编程技术，以及模拟nat的工作过程
 
-![1554379251420](https://github.com/XingToMax/ComputerNetworkLab/images/1554379251420.png)
+![1554379251420](https://github.com/XingToMax/ComputerNetworkLab/blob/master/images/1554379251420.png?raw=true)
  2、实验内容：
 
 i.               要求学生掌握利用Socket进行编程的技术

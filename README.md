@@ -1,5 +1,5 @@
 # ComputerNetworkLab
-基于NIO、Netty实现一些计算机网络交互中常见的协议与应用，通过springboot提供服务
+基于socket实现一些计算机网络交互中常见的协议与应用，通过springboot提供服务
 
 ### List
 

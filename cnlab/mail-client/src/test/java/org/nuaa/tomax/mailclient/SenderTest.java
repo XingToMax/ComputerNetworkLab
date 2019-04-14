@@ -2,6 +2,7 @@ package org.nuaa.tomax.mailclient;
 
 import org.junit.Test;
 import org.nuaa.tomax.mailclient.core.Sender;
+import org.nuaa.tomax.mailclient.utils.Base64Wrapper;
 
 /**
  * @Author: ToMax
@@ -24,8 +25,5 @@ public class SenderTest {
     }
 
     public static void main(String[] args) {
-        testQueryDomain();
-
-        testExtractHostFromEmailAddress();
     }
 }

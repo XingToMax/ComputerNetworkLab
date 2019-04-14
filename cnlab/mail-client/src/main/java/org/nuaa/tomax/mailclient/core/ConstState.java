@@ -7,6 +7,10 @@ package org.nuaa.tomax.mailclient.core;
  */
 public class ConstState {
     /**
+     * socket连接成功
+     */
+    public final static int CONNECT_SUCCESS = 220;
+    /**
      * 服务就绪
      */
     public final static int SERVICE_READY = 202;
@@ -34,4 +38,9 @@ public class ConstState {
      * 命令无法执行
      */
     public final static int COMMAND_UN_EXECUTABLE = 550;
+
+    /**
+     * auth login 响应
+     */
+    public final static int AUTH_RESPONSE = 334;
 }

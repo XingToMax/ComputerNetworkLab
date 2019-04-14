@@ -68,7 +68,7 @@ public class Sender {
         this.smtp = smtp;
     }
 
-    public List<SendMessage> send(String from, String to, String content) {
+    public List<SendMessage> send(String from, String to, String user, String password, String subject, String content) {
         // check from
         if (!MAIL_PATTERN.matcher(from).find()) {
             throw new IllegalArgumentException("param from(" + from + ") is not a valid email address");
@@ -77,11 +77,16 @@ public class Sender {
             throw new IllegalArgumentException("param to(" + to + ") is not a valid email address");
         }
 
+        log.info("mail send from " + from + " to " + to + " begin");
+
         List<SendMessage> messages = new LinkedList<>();
 
         Socket socket = null;
         InputStream in = null;
         OutputStream out = null;
+        BufferedInputStream bis = null;
+        BufferedOutputStream bos = null;
+        // connect to smtp server
         for (int i = 1; i <= RETRY; i++) {
             try {
                 // begin connect
@@ -89,6 +94,16 @@ public class Sender {
                 socket = new Socket(smtp, PORT);
                 in = socket.getInputStream();
                 out = socket.getOutputStream();
+
+                bis = new BufferedInputStream(in);
+                bos = new BufferedOutputStream(out);
+
+                if (extractResponseCode(bis) != ConstState.CONNECT_SUCCESS) {
+                    String message = "connect to stmp server fail";
+                    log.info(message);
+                    messages.add(new SendMessage(message, 0));
+                }
+
                 log.info("connect to " + smtp + " success");
                 // connect success and quit
                 break;
@@ -114,16 +129,108 @@ public class Sender {
             return messages;
         }
 
-        if (in == null || out == null) {
-            String message = "cannot get input stream or output stream";
+        // hello
+        sendMessage(bos, Instruction.HELLO + " " + extractHostFromEmailAddress(from));
+        if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+            String message = "helo error";
             log.info(message);
             messages.add(new SendMessage(message, 0));
             return messages;
         }
 
-        BufferedInputStream bis = new BufferedInputStream(in);
-        BufferedOutputStream bos = new BufferedOutputStream(out);
+        // auth login
+        sendMessage(bos, Instruction.AUTH);
+        if (extractResponseCode(bis) != ConstState.AUTH_RESPONSE) {
+            String message = "auth login error";
+            log.info(message);
+            messages.add(new SendMessage(message, 0));
+            return messages;
+        }
 
+        // send username
+        sendMessage(bos, user);
+        if (extractResponseCode(bis) != ConstState.AUTH_RESPONSE) {
+            String message = "auth login(send user name) error";
+            log.info(message);
+            messages.add(new SendMessage(message, 0));
+            return messages;
+        }
+
+        // send password
+        sendMessage(bos, password);
+        if (extractResponseCode(bis) != ConstState.AUTH_ACCESS) {
+            String message = "auth login password error";
+            log.info(message);
+            messages.add(new SendMessage(message, 0));
+            return messages;
+        }
+
+        // mail from
+        sendMessage(bos, Instruction.MAIL_FROM + ": <" + from + ">");
+        if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+            String message = "mail from error";
+            log.info(message);
+            messages.add(new SendMessage(message, 0));
+            return messages;
+        }
+
+        // mail to
+        sendMessage(bos, Instruction.MAIL_TO + ": <" + to + ">");
+        if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+            String message = "mail to error";
+            log.info(message);
+            messages.add(new SendMessage(message, 0));
+            return messages;
+        }
+
+        // start data transmission
+        sendMessage(bos, Instruction.DATA);
+        if (extractResponseCode(bis) != ConstState.START_SEND) {
+            String message = "start send data error";
+            log.info(message);
+            messages.add(new SendMessage(message, 0));
+            return messages;
+        }
+        // send data
+        sendMessage(bos, "subject:hello");
+        sendMessage(bos, "from:" + from);
+        sendMessage(bos, "to:" + to);
+        sendMessage(bos, "Content-Type: text/plain;charset=\"gb2312\"");
+        sendMessage(bos, "");
+        sendMessage(bos, content);
+        sendMessage(bos, "");
+        sendMessage(bos, ".");
+        sendMessage(bos, "");
+
+        if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+            String message = "send data error";
+            log.info(message);
+            messages.add(new SendMessage(message, 0));
+            return messages;
+        }
+
+        // quit
+        sendMessage(bos, Instruction.QUIT);
+        if (extractResponseCode(bis) != ConstState.PROCESSING) {
+            String message = "quit error";
+            log.info(message);
+            messages.add(new SendMessage(message, 0));
+            return messages;
+        }
+
+
+        // close
+        try {
+            bis.close();
+            bos.close();
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (messages.size() == 0) {
+            log.info("mail send from " + from + " to " + to + " success");
+        }
 
         return messages;
     }
@@ -164,5 +271,32 @@ public class Sender {
 
     public static String extractHostFromEmailAddress(String url) {
         return url.split("@")[1];
+    }
+
+    public static int extractResponseCode(BufferedInputStream bis) {
+        byte[] buffer = new byte[1024];
+        String response = null;
+        int len = 0;
+        try {
+            len = bis.read(buffer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (len < 0) {
+            return len;
+        }
+        response = new String(buffer, 0, len).trim();
+        log.info("connect response: " + response);
+        return Integer.parseInt(response.split("\\s+")[0]);
+    }
+
+    public static void sendMessage(BufferedOutputStream bos, String content) {
+        byte[] bytes = (content + "\r\n").getBytes();
+        try {
+            bos.write(bytes);
+            bos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

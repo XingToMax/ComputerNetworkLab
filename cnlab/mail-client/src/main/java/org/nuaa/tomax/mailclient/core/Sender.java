@@ -7,6 +7,7 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -86,147 +87,152 @@ public class Sender {
         OutputStream out = null;
         BufferedInputStream bis = null;
         BufferedOutputStream bos = null;
-        // connect to smtp server
-        for (int i = 1; i <= RETRY; i++) {
-            try {
-                // begin connect
-                log.info("begin to connect to stmp server(" + smtp + ")");
-                socket = new Socket(smtp, PORT);
-                in = socket.getInputStream();
-                out = socket.getOutputStream();
 
-                bis = new BufferedInputStream(in);
-                bos = new BufferedOutputStream(out);
+        try {
+            // connect to smtp server
+            for (int i = 1; i <= RETRY; i++) {
+                try {
+                    // begin connect
+                    log.info("begin to connect to stmp server(" + smtp + ")");
+                    socket = new Socket(smtp, PORT);
+                    in = socket.getInputStream();
+                    out = socket.getOutputStream();
 
-                if (extractResponseCode(bis) != ConstState.CONNECT_SUCCESS) {
-                    String message = "connect to stmp server fail";
+                    bis = new BufferedInputStream(in);
+                    bos = new BufferedOutputStream(out);
+
+                    if (extractResponseCode(bis) != ConstState.CONNECT_SUCCESS) {
+                        String message = "connect to stmp server fail";
+                        log.info(message);
+                        messages.add(new SendMessage(message, 0));
+                    }
+
+                    log.info("connect to " + smtp + " success");
+                    // connect success and quit
+                    break;
+                } catch (IOException e) {
+                    // connect fail
+                    String message = "connect to smtp server(" + smtp + ") fail, count " + i;
                     log.info(message);
                     messages.add(new SendMessage(message, 0));
+                    // retry
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(INTERVAL);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                 }
+            }
 
-                log.info("connect to " + smtp + " success");
-                // connect success and quit
-                break;
-            } catch (IOException e) {
-                // connect fail
-                String message = "connect to smtp server(" + smtp + ") fail, count " + i;
+            // connect fail after retry limit
+            if (socket == null) {
+                String message = "cannot connect to smtp server(" + smtp + ")";
                 log.info(message);
                 messages.add(new SendMessage(message, 0));
-                // retry
-                try {
-                    TimeUnit.MILLISECONDS.sleep(INTERVAL);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
+                return messages;
+            }
+
+            socket.setSoTimeout(TIMEOUT);
+
+            // hello
+            sendMessage(bos, Instruction.HELLO + " " + extractHostFromEmailAddress(from));
+            if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+                String message = "helo error";
+                log.info(message);
+                messages.add(new SendMessage(message, 0));
+                return messages;
+            }
+
+            // auth login
+            sendMessage(bos, Instruction.AUTH);
+            if (extractResponseCode(bis) != ConstState.AUTH_RESPONSE) {
+                String message = "auth login error";
+                log.info(message);
+                messages.add(new SendMessage(message, 0));
+                return messages;
+            }
+
+            // send username
+            sendMessage(bos, user);
+            if (extractResponseCode(bis) != ConstState.AUTH_RESPONSE) {
+                String message = "auth login(send user name) error";
+                log.info(message);
+                messages.add(new SendMessage(message, 0));
+                return messages;
+            }
+
+            // send password
+            sendMessage(bos, password);
+            if (extractResponseCode(bis) != ConstState.AUTH_ACCESS) {
+                String message = "auth login password error";
+                log.info(message);
+                messages.add(new SendMessage(message, 0));
+                return messages;
+            }
+
+            // mail from
+            sendMessage(bos, Instruction.MAIL_FROM + ": <" + from + ">");
+            if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+                String message = "mail from error";
+                log.info(message);
+                messages.add(new SendMessage(message, 0));
+                return messages;
+            }
+
+            // mail to
+            sendMessage(bos, Instruction.MAIL_TO + ": <" + to + ">");
+            if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+                String message = "mail to error";
+                log.info(message);
+                messages.add(new SendMessage(message, 0));
+                return messages;
+            }
+
+            // start data transmission
+            sendMessage(bos, Instruction.DATA);
+            if (extractResponseCode(bis) != ConstState.START_SEND) {
+                String message = "start send data error";
+                log.info(message);
+                messages.add(new SendMessage(message, 0));
+                return messages;
+            }
+            // send data
+
+            sendMessage(bos, "subject:" + subject);
+            sendMessage(bos, "from:" + from);
+            sendMessage(bos, "to:" + to);
+            sendMessage(bos, "Content-Type: text/plain;charset=\"gb2312\"");
+            sendMessage(bos, content);
+            sendMessage(bos, ".");
+//
+            if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+                String message = "send data error";
+                log.info(message);
+                messages.add(new SendMessage(message, 0));
+                return messages;
+            }
+
+            // quit
+            sendMessage(bos, Instruction.QUIT);
+            if (extractResponseCode(bis) != ConstState.PROCESSING) {
+                String message = "quit error";
+                log.info(message);
+                messages.add(new SendMessage(message, 0));
+                return messages;
+            }
+        } catch (SocketException e) {
+            log.info("connect timeout");
+        } finally {
+            // close
+            try {
+                bis.close();
+                bos.close();
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 
-        // connect fail after retry limit
-        if (socket == null) {
-            String message = "cannot connect to smtp server(" + smtp + ")";
-            log.info(message);
-            messages.add(new SendMessage(message, 0));
-            return messages;
-        }
-
-        // hello
-        sendMessage(bos, Instruction.HELLO + " " + extractHostFromEmailAddress(from));
-        if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
-            String message = "helo error";
-            log.info(message);
-            messages.add(new SendMessage(message, 0));
-            return messages;
-        }
-
-        // auth login
-        sendMessage(bos, Instruction.AUTH);
-        if (extractResponseCode(bis) != ConstState.AUTH_RESPONSE) {
-            String message = "auth login error";
-            log.info(message);
-            messages.add(new SendMessage(message, 0));
-            return messages;
-        }
-
-        // send username
-        sendMessage(bos, user);
-        if (extractResponseCode(bis) != ConstState.AUTH_RESPONSE) {
-            String message = "auth login(send user name) error";
-            log.info(message);
-            messages.add(new SendMessage(message, 0));
-            return messages;
-        }
-
-        // send password
-        sendMessage(bos, password);
-        if (extractResponseCode(bis) != ConstState.AUTH_ACCESS) {
-            String message = "auth login password error";
-            log.info(message);
-            messages.add(new SendMessage(message, 0));
-            return messages;
-        }
-
-        // mail from
-        sendMessage(bos, Instruction.MAIL_FROM + ": <" + from + ">");
-        if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
-            String message = "mail from error";
-            log.info(message);
-            messages.add(new SendMessage(message, 0));
-            return messages;
-        }
-
-        // mail to
-        sendMessage(bos, Instruction.MAIL_TO + ": <" + to + ">");
-        if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
-            String message = "mail to error";
-            log.info(message);
-            messages.add(new SendMessage(message, 0));
-            return messages;
-        }
-
-        // start data transmission
-        sendMessage(bos, Instruction.DATA);
-        if (extractResponseCode(bis) != ConstState.START_SEND) {
-            String message = "start send data error";
-            log.info(message);
-            messages.add(new SendMessage(message, 0));
-            return messages;
-        }
-        // send data
-        sendMessage(bos, "subject:hello");
-        sendMessage(bos, "from:" + from);
-        sendMessage(bos, "to:" + to);
-        sendMessage(bos, "Content-Type: text/plain;charset=\"gb2312\"");
-        sendMessage(bos, "");
-        sendMessage(bos, content);
-        sendMessage(bos, "");
-        sendMessage(bos, ".");
-        sendMessage(bos, "");
-
-        if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
-            String message = "send data error";
-            log.info(message);
-            messages.add(new SendMessage(message, 0));
-            return messages;
-        }
-
-        // quit
-        sendMessage(bos, Instruction.QUIT);
-        if (extractResponseCode(bis) != ConstState.PROCESSING) {
-            String message = "quit error";
-            log.info(message);
-            messages.add(new SendMessage(message, 0));
-            return messages;
-        }
-
-
-        // close
-        try {
-            bis.close();
-            bos.close();
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         if (messages.size() == 0) {
             log.info("mail send from " + from + " to " + to + " success");

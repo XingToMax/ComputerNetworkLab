@@ -25,5 +25,16 @@ public class SenderTest {
     }
 
     public static void main(String[] args) {
+//        testQueryDomain();
+//
+//        testExtractHostFromEmailAddress();
+
+        Sender sender = new Sender("smtp.163.com");
+        String encodeUser = Base64Wrapper.encode("**");
+        String encodePwd = Base64Wrapper.encode("**");
+        String content = "hello";
+
+        sender.send("**", "**", encodeUser, encodePwd, "hello", content);
     }
+
 }

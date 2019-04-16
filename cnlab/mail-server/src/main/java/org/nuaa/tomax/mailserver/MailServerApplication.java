@@ -8,6 +8,7 @@ public class MailServerApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(MailServerApplication.class, args);
+
     }
 
 }

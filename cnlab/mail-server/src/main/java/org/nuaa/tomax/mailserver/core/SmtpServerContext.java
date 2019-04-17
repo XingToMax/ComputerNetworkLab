@@ -13,11 +13,13 @@ import lombok.extern.java.Log;
 public class SmtpServerContext {
     private final String smtp;
     private final int port;
+    private final String host;
 
 
-    public SmtpServerContext(String smtp, int port) {
+    public SmtpServerContext(String smtp, int port, String host) {
         this.smtp = smtp;
         this.port = port;
+        this.host = host;
     }
 
     public String getSmtp() {
@@ -26,5 +28,9 @@ public class SmtpServerContext {
 
     public int getPort() {
         return this.port;
+    }
+
+    public String getHost() {
+        return this.host;
     }
 }

@@ -4,6 +4,12 @@ import org.junit.Test;
 import org.nuaa.tomax.mailclient.core.Sender;
 import org.nuaa.tomax.mailclient.utils.Base64Wrapper;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
+
 /**
  * @Author: ToMax
  * @Description:
@@ -24,17 +30,17 @@ public class SenderTest {
         System.out.println(Sender.extractHostFromEmailAddress("hello@qq.com"));
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 //        testQueryDomain();
 //
 //        testExtractHostFromEmailAddress();
 
         Sender sender = new Sender("smtp.163.com");
         String encodeUser = Base64Wrapper.encode("**");
-        String encodePwd = Base64Wrapper.encode("**");
+        String encodePwd = Base64Wrapper.encode("***");
         String content = "hello";
 
-        sender.send("**", "**", encodeUser, encodePwd, "hello", content);
+        sender.send("***", "***", encodeUser, encodePwd, "hello", content);
     }
 
 }

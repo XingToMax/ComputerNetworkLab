@@ -37,7 +37,7 @@ public class MailSendUtil {
             log.info("extract message from input stream error");
         }
 
-        return builder.toString();
+        return builder.toString().trim();
     }
 
     public static String extractIpFromSocket(Socket socket) {

@@ -43,4 +43,19 @@ public class ConstState {
      * auth login 响应
      */
     public final static int AUTH_RESPONSE = 334;
+
+    /**
+     * service not available
+     */
+    public final static int SERVICE_NOT_AVAILABLE = 421;
+
+    /**
+     * 前后参数不一致
+     */
+    public final static int PARAM_CONFLICT = 553;
+
+    /**
+     * 未按照顺序执行
+     */
+    public final static int BAD_SEQUENCE = 503;
 }

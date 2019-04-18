@@ -1,13 +1,13 @@
-package org.nuaa.tomax.mailclient.core;
+package org.nuaa.tomax.mailserver.constant;
 
 /**
- * @Name: Instruction
+ * @Name: SmtpInstruction
  * @Description: TODO
  * @Author: tomax
  * @Date: 2019-04-13 22:00
  * @Version: 1.0
  */
-public class Instruction {
+public class SmtpInstruction {
     /**
      * helo 指令
      */

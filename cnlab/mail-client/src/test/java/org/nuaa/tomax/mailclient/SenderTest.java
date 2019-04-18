@@ -1,6 +1,7 @@
 package org.nuaa.tomax.mailclient;
 
 import org.junit.Test;
+import org.nuaa.tomax.mailclient.core.MailBean;
 import org.nuaa.tomax.mailclient.core.Sender;
 import org.nuaa.tomax.mailclient.utils.Base64Wrapper;
 
@@ -38,9 +39,13 @@ public class SenderTest {
         Sender sender = new Sender("localhost");
         String encodeUser = Base64Wrapper.encode("tomax");
         String encodePwd = Base64Wrapper.encode("tomax1111");
-        String content = "hello";
 
-        sender.send("tomax@localhost", "1121584497@qq.com", encodeUser, encodePwd, "hello", content);
+        MailBean mail = new MailBean("tomax@localhost", "1121584497@qq.com",
+                Base64Wrapper.encode("hello"), "hello", "base64",
+                false, false)
+                .updateAuthInfo(encodeUser, encodePwd);
+
+        sender.send(mail);
     }
 
 }

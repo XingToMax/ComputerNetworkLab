@@ -1,11 +1,11 @@
-package org.nuaa.tomax.mailclient.core;
+package org.nuaa.tomax.mailclient.constant;
 
 /**
  * @Author: ToMax
  * @Description:
  * @Date: Created in 2019/4/9 23:13
  */
-public class ConstState {
+public class SmtpResponseState {
     /**
      * socket连接成功
      */

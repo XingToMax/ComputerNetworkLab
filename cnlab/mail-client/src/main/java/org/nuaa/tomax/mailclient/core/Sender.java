@@ -1,13 +1,14 @@
 package org.nuaa.tomax.mailclient.core;
 
 import lombok.extern.java.Log;
+import org.nuaa.tomax.mailclient.constant.SmtpInstruction;
+import org.nuaa.tomax.mailclient.constant.SmtpResponseState;
 
 import javax.naming.directory.InitialDirContext;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -69,16 +70,16 @@ public class Sender {
         this.smtp = smtp;
     }
 
-    public List<SendMessage> send(String from, String to, String user, String password, String subject, String content) {
+    public List<SendMessage> send(MailBean mail) {
         // check from
 //        if (!MAIL_PATTERN.matcher(from).find()) {
 //            throw new IllegalArgumentException("param from(" + from + ") is not a valid email address");
 //        }
-        if (!MAIL_PATTERN.matcher(to).find()) {
-            throw new IllegalArgumentException("param to(" + to + ") is not a valid email address");
+        if (!MAIL_PATTERN.matcher(mail.getTo()).find()) {
+            throw new IllegalArgumentException("param to(" + mail.getTo() + ") is not a valid email address");
         }
 
-        log.info("mail send from " + from + " to " + to + " begin");
+        log.info("mail send from " + mail.getFrom() + " to " + mail.getTo() + " begin");
 
         List<SendMessage> messages = new LinkedList<>();
 
@@ -101,7 +102,7 @@ public class Sender {
                     bis = new BufferedInputStream(in);
                     bos = new BufferedOutputStream(out);
 
-                    if (extractResponseCode(bis) != ConstState.CONNECT_SUCCESS) {
+                    if (extractResponseCode(bis) != SmtpResponseState.CONNECT_SUCCESS) {
                         String message = "connect to stmp server fail";
                         log.info(message);
                         messages.add(new SendMessage(message, 0));
@@ -135,8 +136,8 @@ public class Sender {
             socket.setSoTimeout(TIMEOUT);
 
             // hello
-            sendMessage(bos, Instruction.HELLO + " " + extractHostFromEmailAddress(from));
-            if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+            sendMessage(bos, SmtpInstruction.HELLO + " " + extractHostFromEmailAddress(mail.getFrom()));
+            if (extractResponseCode(bis) != SmtpResponseState.REQUEST_FINISH) {
                 String message = "helo error";
                 log.info(message);
                 messages.add(new SendMessage(message, 0));
@@ -144,8 +145,8 @@ public class Sender {
             }
 
             // auth login
-            sendMessage(bos, Instruction.AUTH);
-            if (extractResponseCode(bis) != ConstState.AUTH_RESPONSE) {
+            sendMessage(bos, SmtpInstruction.AUTH);
+            if (extractResponseCode(bis) != SmtpResponseState.AUTH_RESPONSE) {
                 String message = "auth login error";
                 log.info(message);
                 messages.add(new SendMessage(message, 0));
@@ -153,8 +154,8 @@ public class Sender {
             }
 
             // send username
-            sendMessage(bos, user);
-            if (extractResponseCode(bis) != ConstState.AUTH_RESPONSE) {
+            sendMessage(bos, mail.getUser());
+            if (extractResponseCode(bis) != SmtpResponseState.AUTH_RESPONSE) {
                 String message = "auth login(send user name) error";
                 log.info(message);
                 messages.add(new SendMessage(message, 0));
@@ -162,8 +163,8 @@ public class Sender {
             }
 
             // send password
-            sendMessage(bos, password);
-            if (extractResponseCode(bis) != ConstState.AUTH_ACCESS) {
+            sendMessage(bos, mail.getPassword());
+            if (extractResponseCode(bis) != SmtpResponseState.AUTH_ACCESS) {
                 String message = "auth login password error";
                 log.info(message);
                 messages.add(new SendMessage(message, 0));
@@ -171,8 +172,8 @@ public class Sender {
             }
 
             // mail from
-            sendMessage(bos, Instruction.MAIL_FROM + ": <" + from + ">");
-            if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+            sendMessage(bos, SmtpInstruction.MAIL_FROM + ": <" + mail.getFrom() + ">");
+            if (extractResponseCode(bis) != SmtpResponseState.REQUEST_FINISH) {
                 String message = "mail from error";
                 log.info(message);
                 messages.add(new SendMessage(message, 0));
@@ -180,8 +181,8 @@ public class Sender {
             }
 
             // mail to
-            sendMessage(bos, Instruction.MAIL_TO + ": <" + to + ">");
-            if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+            sendMessage(bos, SmtpInstruction.MAIL_TO + ": <" + mail.getTo() + ">");
+            if (extractResponseCode(bis) != SmtpResponseState.REQUEST_FINISH) {
                 String message = "mail to error";
                 log.info(message);
                 messages.add(new SendMessage(message, 0));
@@ -189,8 +190,8 @@ public class Sender {
             }
 
             // start data transmission
-            sendMessage(bos, Instruction.DATA);
-            if (extractResponseCode(bis) != ConstState.START_SEND) {
+            sendMessage(bos, SmtpInstruction.DATA);
+            if (extractResponseCode(bis) != SmtpResponseState.START_SEND) {
                 String message = "start send data error";
                 log.info(message);
                 messages.add(new SendMessage(message, 0));
@@ -198,14 +199,14 @@ public class Sender {
             }
             // send data
 
-            sendMessage(bos, "subject:" + subject);
-            sendMessage(bos, "from:" + from);
-            sendMessage(bos, "to:" + to);
+            sendMessage(bos, "subject:" + mail.getSubject());
+            sendMessage(bos, "from:" + mail.getFrom());
+            sendMessage(bos, "to:" + mail.getTo());
             sendMessage(bos, "Content-Type: text/plain;charset=\"gb2312\"");
-            sendMessage(bos, content);
+            sendMessage(bos, mail.getContent());
             sendMessage(bos, ".");
 
-            if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
+            if (extractResponseCode(bis) != SmtpResponseState.REQUEST_FINISH) {
                 String message = "send data error";
                 log.info(message);
                 messages.add(new SendMessage(message, 0));
@@ -213,8 +214,8 @@ public class Sender {
             }
 
             // quit
-            sendMessage(bos, Instruction.QUIT);
-            if (extractResponseCode(bis) != ConstState.PROCESSING) {
+            sendMessage(bos, SmtpInstruction.QUIT);
+            if (extractResponseCode(bis) != SmtpResponseState.PROCESSING) {
                 String message = "quit error";
                 log.info(message);
                 messages.add(new SendMessage(message, 0));
@@ -235,7 +236,7 @@ public class Sender {
 
 
         if (messages.size() == 0) {
-            log.info("mail send from " + from + " to " + to + " success");
+            log.info("mail send from " + mail.getFrom() + " to " + mail.getTo() + " success");
         }
 
         return messages;

@@ -1,6 +1,8 @@
 package org.nuaa.tomax.mailserver.core;
 
 import lombok.extern.java.Log;
+import org.nuaa.tomax.mailserver.constant.SmtpInstruction;
+import org.nuaa.tomax.mailserver.constant.SmtpResponseState;
 import org.nuaa.tomax.mailserver.utils.Base64Wrapper;
 import org.nuaa.tomax.mailserver.utils.MailSendUtil;
 
@@ -56,7 +58,7 @@ public class SocketHandler implements Runnable{
 
             // reply
             MailSendUtil.sendMessage(bos,
-                    ConstState.CONNECT_SUCCESS + " from " + context.getSmtp());
+                    SmtpResponseState.CONNECT_SUCCESS + " from " + context.getSmtp());
 
             // read instruction, process from helo and success to next
             handleHello(bis, bos);
@@ -78,12 +80,12 @@ public class SocketHandler implements Runnable{
         String msg = MailSendUtil.extractMessage(bis);
 
         String[] parts = msg.split("\\s+");
-        if (parts.length >= 2 && parts[0].equalsIgnoreCase(Instruction.HELLO)) {
+        if (parts.length >= 2 && parts[0].equalsIgnoreCase(SmtpInstruction.HELLO)) {
             // TODO : check service available, if cannot apply message below
-            // MailSendUtil.sendMessage(bos, ConstState.SERVICE_NOT_AVAILABLE + " Service not available");
+            // MailSendUtil.sendMessage(bos, SmtpResponseState.SERVICE_NOT_AVAILABLE + " Service not available");
             mail.setHostName(parts[1]);
 
-            MailSendUtil.sendMessage(bos, ConstState.REQUEST_FINISH + " OK");
+            MailSendUtil.sendMessage(bos, SmtpResponseState.REQUEST_FINISH + " OK");
             log.info("helo from " + mail.getHostName() + " success");
             // continue next step
             return handleAuthOrFrom(bis, bos);
@@ -91,16 +93,16 @@ public class SocketHandler implements Runnable{
 
         // cannot recognize instruction
         MailSendUtil.sendMessage(bos,
-                ConstState.INSTRUCTION_ERROR + " invalid command " + msg);
+                SmtpResponseState.INSTRUCTION_ERROR + " invalid command " + msg);
         log.info("helo error");
         return false;
     }
 
     private boolean handleAuthOrFrom(BufferedInputStream bis, BufferedOutputStream bos) {
         String msg = MailSendUtil.extractMessage(bis);
-        if (msg.length() >= Instruction.AUTH.length() &&
-                msg.substring(0, Instruction.AUTH.length())
-                .equalsIgnoreCase(Instruction.AUTH)) {
+        if (msg.length() >= SmtpInstruction.AUTH.length() &&
+                msg.substring(0, SmtpInstruction.AUTH.length())
+                .equalsIgnoreCase(SmtpInstruction.AUTH)) {
             log.info("auth");
             return handleAuth(bis, bos, msg);
         } else {
@@ -111,7 +113,7 @@ public class SocketHandler implements Runnable{
 
     private boolean handleAuth(BufferedInputStream bis, BufferedOutputStream bos, String msg) {
         // check auth
-        MailSendUtil.sendMessage(bos, ConstState.AUTH_RESPONSE + " OK");
+        MailSendUtil.sendMessage(bos, SmtpResponseState.AUTH_RESPONSE + " OK");
         return handleAuthUsername(bis, bos);
     }
 
@@ -120,14 +122,14 @@ public class SocketHandler implements Runnable{
         String username = Base64Wrapper.decode(msg);
         // TODO : check username exists
         mail.setUser(username);
-        MailSendUtil.sendMessage(bos, ConstState.AUTH_RESPONSE + " " + Base64Wrapper.encode("username: "));
+        MailSendUtil.sendMessage(bos, SmtpResponseState.AUTH_RESPONSE + " " + Base64Wrapper.encode("username: "));
         return handleAuthPassword(bis, bos);
     }
 
     private boolean handleAuthPassword(BufferedInputStream bis, BufferedOutputStream bos) {
         String password = MailSendUtil.extractMessage(bis);
         // TODO : check password
-        MailSendUtil.sendMessage(bos, ConstState.AUTH_ACCESS + " " + Base64Wrapper.encode("password: "));
+        MailSendUtil.sendMessage(bos, SmtpResponseState.AUTH_ACCESS + " " + Base64Wrapper.encode("password: "));
         // update mode to login success mode
         mail.setMode(LOCAL_RECEIVE_MODE);
         return handleFrom(bis, bos, MailSendUtil.extractMessage(bis));
@@ -136,7 +138,7 @@ public class SocketHandler implements Runnable{
     private boolean handleFrom(BufferedInputStream bis, BufferedOutputStream bos, String msg) {
         if (msg.contains(":")) {
             String[] parts = msg.split(":");
-            if (parts[0].trim().equalsIgnoreCase(Instruction.MAIL_FROM) &&
+            if (parts[0].trim().equalsIgnoreCase(SmtpInstruction.MAIL_FROM) &&
                     parts.length > 1 &&
                     parts[1].trim().startsWith("<") &&
                     parts[1].trim().endsWith(">")) {
@@ -146,7 +148,7 @@ public class SocketHandler implements Runnable{
                 // user name not match before
                 if (mail.getUser() != null && !mailParts[0].equals(mail.getUser())) {
                     log.info("from param is not matching auth login name");
-                    MailSendUtil.sendMessage(bos, ConstState.PARAM_CONFLICT + " Mail from must equal authorized user");
+                    MailSendUtil.sendMessage(bos, SmtpResponseState.PARAM_CONFLICT + " Mail from must equal authorized user");
                     return false;
                 }
 
@@ -156,20 +158,20 @@ public class SocketHandler implements Runnable{
                 } else if (mail.getMode() == NOT_LOGIN_MODE) {
                     // client belongs to current server, but not login
                     log.info("not login and wants to forward by current server");
-                    MailSendUtil.sendMessage(bos, ConstState.BAD_SEQUENCE + " bad sequence of commands");
+                    MailSendUtil.sendMessage(bos, SmtpResponseState.BAD_SEQUENCE + " bad sequence of commands");
                     return false;
                 }
 
                 mail.setFrom(from);
 
-                MailSendUtil.sendMessage(bos, ConstState.REQUEST_FINISH + " OK");
+                MailSendUtil.sendMessage(bos, SmtpResponseState.REQUEST_FINISH + " OK");
 
                 return handleRcpt(bis, bos);
             }
         }
-        log.info(ConstState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
+        log.info(SmtpResponseState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
         MailSendUtil.sendMessage(bos,
-                ConstState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
+                SmtpResponseState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
         return false;
     }
 
@@ -177,7 +179,7 @@ public class SocketHandler implements Runnable{
         String msg = MailSendUtil.extractMessage(bis);
         if (msg.contains(":")) {
             String[] parts = msg.split(":");
-            if (parts[0].equalsIgnoreCase(Instruction.MAIL_TO) &&
+            if (parts[0].equalsIgnoreCase(SmtpInstruction.MAIL_TO) &&
                     parts.length > 1 &&
                     parts[1].trim().startsWith("<") &&
                     parts[1].trim().endsWith(">")) {
@@ -188,7 +190,7 @@ public class SocketHandler implements Runnable{
                 // remote recieve mode need rcpt to address host is current host
                 if (mail.getMode() == REMOTE_RECEIVE_MODE && !mailParts[1].equals(context.getHost())) {
                     log.info("unknown rcpt host");
-                    MailSendUtil.sendMessage(bos, ConstState.COMMAND_UN_EXECUTABLE + " unknown rcpt host");
+                    MailSendUtil.sendMessage(bos, SmtpResponseState.COMMAND_UN_EXECUTABLE + " unknown rcpt host");
                     return false;
                 }
 
@@ -199,34 +201,34 @@ public class SocketHandler implements Runnable{
 
                 mail.setTo(to);
                 // TODO : check user
-                MailSendUtil.sendMessage(bos, ConstState.REQUEST_FINISH + " OK");
+                MailSendUtil.sendMessage(bos, SmtpResponseState.REQUEST_FINISH + " OK");
 
                 return handleData(bis, bos);
             }
         }
-        log.info(ConstState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
+        log.info(SmtpResponseState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
         MailSendUtil.sendMessage(bos,
-                ConstState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
+                SmtpResponseState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
         return false;
 
     }
 
     private boolean handleData(BufferedInputStream bis, BufferedOutputStream bos) {
         String msg = MailSendUtil.extractMessage(bis);
-        if (msg.length() >= Instruction.DATA.length() &&
-        msg.substring(0, Instruction.DATA.length()).equalsIgnoreCase(
-                Instruction.DATA
+        if (msg.length() >= SmtpInstruction.DATA.length() &&
+        msg.substring(0, SmtpInstruction.DATA.length()).equalsIgnoreCase(
+                SmtpInstruction.DATA
         )) {
             // TODO : init data receive task
-            MailSendUtil.sendMessage(bos, ConstState.START_SEND + " End data with <CR><LF>.<CR><LF>");
+            MailSendUtil.sendMessage(bos, SmtpResponseState.START_SEND + " End data with <CR><LF>.<CR><LF>");
             // begin receive data task
             readData(bis, bos);
             return handleQuit(bis, bos);
 
         }
-        log.info(ConstState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
+        log.info(SmtpResponseState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
         MailSendUtil.sendMessage(bos,
-                ConstState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
+                SmtpResponseState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
         return false;
     }
 
@@ -236,14 +238,14 @@ public class SocketHandler implements Runnable{
 
     private boolean handleQuit(BufferedInputStream bis, BufferedOutputStream bos) {
         String msg = MailSendUtil.extractMessage(bis);
-        if (msg.length() >= Instruction.QUIT.length() &&
-        msg.substring(0, Instruction.QUIT.length()).equalsIgnoreCase(Instruction.QUIT)) {
-            MailSendUtil.sendMessage(bos, ConstState.PROCESSING + " QUIT");
+        if (msg.length() >= SmtpInstruction.QUIT.length() &&
+        msg.substring(0, SmtpInstruction.QUIT.length()).equalsIgnoreCase(SmtpInstruction.QUIT)) {
+            MailSendUtil.sendMessage(bos, SmtpResponseState.PROCESSING + " QUIT");
             return true;
         }
-        log.info(ConstState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
+        log.info(SmtpResponseState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
         MailSendUtil.sendMessage(bos,
-                ConstState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
+                SmtpResponseState.INSTRUCTION_ERROR + " cannot recognize command " + msg);
         return false;
     }
 
@@ -263,7 +265,7 @@ public class SocketHandler implements Runnable{
                 String msg = new String(buffer, 0, len);
                 log.info(msg);
                 if (msg.trim().endsWith(".")) {
-                    MailSendUtil.sendMessage(bos, ConstState.REQUEST_FINISH + " OK");
+                    MailSendUtil.sendMessage(bos, SmtpResponseState.REQUEST_FINISH + " OK");
                     return;
                 }
             }
@@ -271,7 +273,7 @@ public class SocketHandler implements Runnable{
             e.printStackTrace();
         }
         // data content error
-        MailSendUtil.sendMessage(bos, ConstState.DATA_INVALID + " exists invalid data");
+        MailSendUtil.sendMessage(bos, SmtpResponseState.DATA_INVALID + " exists invalid data");
     }
 
 }

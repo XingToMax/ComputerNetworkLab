@@ -23,7 +23,7 @@ public class Sender {
     /**
      * smtp 端口
      */
-    private final static int PORT = 25;
+    private final static int PORT = 8081;
     /**
      * 连接失败重连最大次数
      */
@@ -71,9 +71,9 @@ public class Sender {
 
     public List<SendMessage> send(String from, String to, String user, String password, String subject, String content) {
         // check from
-        if (!MAIL_PATTERN.matcher(from).find()) {
-            throw new IllegalArgumentException("param from(" + from + ") is not a valid email address");
-        }
+//        if (!MAIL_PATTERN.matcher(from).find()) {
+//            throw new IllegalArgumentException("param from(" + from + ") is not a valid email address");
+//        }
         if (!MAIL_PATTERN.matcher(to).find()) {
             throw new IllegalArgumentException("param to(" + to + ") is not a valid email address");
         }
@@ -204,7 +204,7 @@ public class Sender {
             sendMessage(bos, "Content-Type: text/plain;charset=\"gb2312\"");
             sendMessage(bos, content);
             sendMessage(bos, ".");
-//
+
             if (extractResponseCode(bis) != ConstState.REQUEST_FINISH) {
                 String message = "send data error";
                 log.info(message);
@@ -220,7 +220,7 @@ public class Sender {
                 messages.add(new SendMessage(message, 0));
                 return messages;
             }
-        } catch (SocketException e) {
+        } catch (Exception e) {
             log.info("connect timeout");
         } finally {
             // close
@@ -286,9 +286,9 @@ public class Sender {
         try {
             len = bis.read(buffer);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info("error : " + e.getMessage());
         }
-        if (len < 0) {
+        if (len <= 0) {
             return len;
         }
         response = new String(buffer, 0, len).trim();

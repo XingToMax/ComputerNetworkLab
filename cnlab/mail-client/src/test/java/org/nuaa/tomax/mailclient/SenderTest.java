@@ -35,12 +35,12 @@ public class SenderTest {
 //
 //        testExtractHostFromEmailAddress();
 
-        Sender sender = new Sender("smtp.163.com");
-        String encodeUser = Base64Wrapper.encode("**");
-        String encodePwd = Base64Wrapper.encode("***");
+        Sender sender = new Sender("localhost");
+        String encodeUser = Base64Wrapper.encode("tomax");
+        String encodePwd = Base64Wrapper.encode("tomax1111");
         String content = "hello";
 
-        sender.send("***", "***", encodeUser, encodePwd, "hello", content);
+        sender.send("tomax@localhost", "1121584497@qq.com", encodeUser, encodePwd, "hello", content);
     }
 
 }

@@ -76,6 +76,7 @@ public class SocketHandler implements Runnable{
 
     private boolean handleHello(BufferedInputStream bis, BufferedOutputStream bos) {
         String msg = MailSendUtil.extractMessage(bis);
+
         String[] parts = msg.split("\\s+");
         if (parts.length >= 2 && parts[0].equalsIgnoreCase(Instruction.HELLO)) {
             // TODO : check service available, if cannot apply message below
@@ -97,18 +98,20 @@ public class SocketHandler implements Runnable{
 
     private boolean handleAuthOrFrom(BufferedInputStream bis, BufferedOutputStream bos) {
         String msg = MailSendUtil.extractMessage(bis);
-        if (msg.length() > Instruction.AUTH.length() &&
+        if (msg.length() >= Instruction.AUTH.length() &&
                 msg.substring(0, Instruction.AUTH.length())
                 .equalsIgnoreCase(Instruction.AUTH)) {
+            log.info("auth");
             return handleAuth(bis, bos, msg);
         } else {
+            log.info("from");
             return handleFrom(bis, bos, msg);
         }
     }
 
     private boolean handleAuth(BufferedInputStream bis, BufferedOutputStream bos, String msg) {
         // check auth
-        MailSendUtil.sendMessage(bos, ConstState.REQUEST_FINISH + " OK");
+        MailSendUtil.sendMessage(bos, ConstState.AUTH_RESPONSE + " OK");
         return handleAuthUsername(bis, bos);
     }
 
@@ -117,14 +120,14 @@ public class SocketHandler implements Runnable{
         String username = Base64Wrapper.decode(msg);
         // TODO : check username exists
         mail.setUser(username);
-        MailSendUtil.sendMessage(bos, ConstState.AUTH_RESPONSE + " " + Base64Wrapper.decode("username: "));
+        MailSendUtil.sendMessage(bos, ConstState.AUTH_RESPONSE + " " + Base64Wrapper.encode("username: "));
         return handleAuthPassword(bis, bos);
     }
 
     private boolean handleAuthPassword(BufferedInputStream bis, BufferedOutputStream bos) {
         String password = MailSendUtil.extractMessage(bis);
         // TODO : check password
-        MailSendUtil.sendMessage(bos, ConstState.AUTH_ACCESS + " " + Base64Wrapper.decode("password: "));
+        MailSendUtil.sendMessage(bos, ConstState.AUTH_ACCESS + " " + Base64Wrapper.encode("password: "));
         // update mode to login success mode
         mail.setMode(LOCAL_RECEIVE_MODE);
         return handleFrom(bis, bos, MailSendUtil.extractMessage(bis));
@@ -133,9 +136,11 @@ public class SocketHandler implements Runnable{
     private boolean handleFrom(BufferedInputStream bis, BufferedOutputStream bos, String msg) {
         if (msg.contains(":")) {
             String[] parts = msg.split(":");
-            if (parts[0].equalsIgnoreCase(Instruction.MAIL_FROM) &&
-                    parts.length > 1 && parts[1].startsWith("<") && parts[1].startsWith(">")) {
-                String from = parts[1].substring(1);
+            if (parts[0].trim().equalsIgnoreCase(Instruction.MAIL_FROM) &&
+                    parts.length > 1 &&
+                    parts[1].trim().startsWith("<") &&
+                    parts[1].trim().endsWith(">")) {
+                String from = parts[1].trim().substring(1, parts[1].trim().length() - 1);
                 // TODO : check from pattern whether is mail or not
                 String[] mailParts = from.split("@");
                 // user name not match before
@@ -173,8 +178,10 @@ public class SocketHandler implements Runnable{
         if (msg.contains(":")) {
             String[] parts = msg.split(":");
             if (parts[0].equalsIgnoreCase(Instruction.MAIL_TO) &&
-                    parts.length > 1 && parts[1].startsWith("<") && parts[1].startsWith(">")) {
-                String to = parts[1].substring(1);
+                    parts.length > 1 &&
+                    parts[1].trim().startsWith("<") &&
+                    parts[1].trim().endsWith(">")) {
+                String to = parts[1].trim().substring(1, parts[1].trim().length() - 1);
                 // TODO : check from pattern whether is mail or not
                 String[] mailParts = to.split("@");
 
@@ -249,18 +256,22 @@ public class SocketHandler implements Runnable{
     }
 
     private void readData(BufferedInputStream bis, BufferedOutputStream bos) {
-        byte[] bytes = new byte[1024];
+        byte[] buffer = new byte[1024];
         int len = 0;
         try {
-            while ((len = bis.read()) > 0) {
-                bis.read(bytes);
-                System.out.println(new String(bytes, 0, len));
+            while ((len = bis.read(buffer)) > 0) {
+                String msg = new String(buffer, 0, len);
+                log.info(msg);
+                if (msg.trim().endsWith(".")) {
+                    MailSendUtil.sendMessage(bos, ConstState.REQUEST_FINISH + " OK");
+                    return;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        MailSendUtil.sendMessage(bos, ConstState.REQUEST_FINISH + " OK");
+        // data content error
+        MailSendUtil.sendMessage(bos, ConstState.DATA_INVALID + " exists invalid data");
     }
 
 }

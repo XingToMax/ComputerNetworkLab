@@ -17,7 +17,7 @@ public class MailServerApplication {
 
         try {
             SmtpServerContext context = new SmtpServerContext(
-                    "localhost", 25, "localhost");
+                    "localhost", 8081, "localhost");
 
             server = new MailServer(context);
 

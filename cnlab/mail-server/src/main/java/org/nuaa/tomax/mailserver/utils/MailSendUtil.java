@@ -30,14 +30,22 @@ public class MailSendUtil {
         StringBuilder builder = new StringBuilder();
         int len = -1;
         try {
-            while ((len = bis.read(buffer)) > 0) {
-                builder.append(new String(buffer, 0, len));
-            }
+            len = bis.read(buffer);
+            builder.append(new String(buffer, 0, len));
         } catch (IOException e) {
-            log.info("extract message from input stream error");
+            e.printStackTrace();
         }
-
-        return builder.toString().trim();
+//        int len = -1;
+//        try {
+//            while ((len = bis.read(buffer)) > 0) {
+//                builder.append(new String(buffer, 0, len));
+//            }
+//        } catch (IOException e) {
+//            log.info("extract message from input stream error");
+//        }
+        String msg = builder.toString().trim();
+        log.info("msg : " + msg + "(" + msg.length() + ")");
+        return msg;
     }
 
     public static String extractIpFromSocket(Socket socket) {

@@ -55,6 +55,11 @@ public class ConstState {
     public final static int PARAM_CONFLICT = 553;
 
     /**
+     * 数据非法
+     */
+    public final static int DATA_INVALID = 554;
+
+    /**
      * 未按照顺序执行
      */
     public final static int BAD_SEQUENCE = 503;

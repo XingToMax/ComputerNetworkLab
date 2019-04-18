@@ -6,10 +6,7 @@ import org.nuaa.tomax.mailserver.utils.MailSendUtil;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -23,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MailServer {
     private SmtpServerContext context = null;
     private ServerSocket server = null;
-    private ThreadPoolExecutor executor = null;
+    private ExecutorService executor = null;
     private boolean run = false;
 
     public MailServer(SmtpServerContext context) {
@@ -33,7 +30,7 @@ public class MailServer {
             private AtomicInteger id = new AtomicInteger(1);
             @Override
             public Thread newThread(Runnable r) {
-                return new Thread("socket-handler-thread-" + id.getAndIncrement());
+                return new Thread(r, "socket-handler-thread-" + id.getAndIncrement());
             }
         });
     }

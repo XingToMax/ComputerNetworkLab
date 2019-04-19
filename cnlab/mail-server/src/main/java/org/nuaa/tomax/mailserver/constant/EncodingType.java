@@ -1,4 +1,4 @@
-package org.nuaa.tomax.mailclient.constant;
+package org.nuaa.tomax.mailserver.constant;
 
 /**
  * @Name: EncodingType

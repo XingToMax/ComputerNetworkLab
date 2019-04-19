@@ -6,6 +6,7 @@ import org.nuaa.tomax.mailclient.core.Sender;
 import org.nuaa.tomax.mailclient.utils.Base64Wrapper;
 import org.nuaa.tomax.mailclient.utils.StringUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -58,8 +59,9 @@ public class SenderTest {
         MailBean mail = new MailBean("tomax@localhost", "1121584497@qq.com",
                 Base64Wrapper.encode("hello"), "hello", "base64",
                 false, false)
-                .updateAuthInfo(encodeUser, encodePwd);
-
+                .updateAuthInfo(encodeUser, encodePwd)
+                .addAttachment(new File("/Users/tomax/study/error.txt"))
+                .addAttachment(new File("/Users/tomax/work/blog/myblogs/README.md"));
         sender.send(mail);
     }
 

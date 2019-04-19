@@ -37,4 +37,14 @@ public class StringUtil {
         String srcSuffix = src.substring(src.length() - suffix.length());
         return srcSuffix.equalsIgnoreCase(suffix);
     }
+
+    /**
+     * get file suffix
+     * @param fileName file name
+     * @return suffix
+     */
+    public static String getFileSuffix(String fileName) {
+        return fileName.contains(".") ?
+                fileName.substring(fileName.lastIndexOf(".") + 1) : "*";
+    }
 }

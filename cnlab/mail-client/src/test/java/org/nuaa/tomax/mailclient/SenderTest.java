@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.nuaa.tomax.mailclient.core.MailBean;
 import org.nuaa.tomax.mailclient.core.Sender;
 import org.nuaa.tomax.mailclient.utils.Base64Wrapper;
+import org.nuaa.tomax.mailclient.utils.StringUtil;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -31,11 +32,25 @@ public class SenderTest {
         System.out.println(Sender.extractHostFromEmailAddress("hello@qq.com"));
     }
 
+    static void checkStartsIgnoreCaseWith() {
+        System.out.println(StringUtil.startsIgnoreCaseWith("abc", "A"));
+        System.out.println(StringUtil.startsIgnoreCaseWith("abc", ""));
+        System.out.println(StringUtil.startsIgnoreCaseWith("abc", "Abc"));
+        System.out.println(StringUtil.startsIgnoreCaseWith("abc", "Abcd"));
+
+        System.out.println(StringUtil.endsIgnoreCaseWith("asdgsdbcd", "BCD"));
+        System.out.println(StringUtil.endsIgnoreCaseWith("asdgsdbcd", ""));
+        System.out.println(StringUtil.endsIgnoreCaseWith("asdgsdbcd", "sd"));
+        System.out.println(StringUtil.endsIgnoreCaseWith("asdgsdbcd", null));
+
+
+    }
+
     public static void main(String[] args) throws InterruptedException {
 //        testQueryDomain();
 //
 //        testExtractHostFromEmailAddress();
-
+//        checkStartsIgnoreCaseWith();
         Sender sender = new Sender("localhost");
         String encodeUser = Base64Wrapper.encode("tomax");
         String encodePwd = Base64Wrapper.encode("tomax1111");

@@ -5,6 +5,7 @@ import org.nuaa.tomax.mailserver.constant.SmtpInstruction;
 import org.nuaa.tomax.mailserver.constant.SmtpResponseState;
 import org.nuaa.tomax.mailserver.utils.Base64Wrapper;
 import org.nuaa.tomax.mailserver.utils.MailSendUtil;
+import org.nuaa.tomax.mailserver.utils.StringUtil;
 
 import java.io.*;
 import java.net.Socket;
@@ -100,9 +101,7 @@ public class SocketHandler implements Runnable{
 
     private boolean handleAuthOrFrom(BufferedInputStream bis, BufferedOutputStream bos) {
         String msg = MailSendUtil.extractMessage(bis);
-        if (msg.length() >= SmtpInstruction.AUTH.length() &&
-                msg.substring(0, SmtpInstruction.AUTH.length())
-                .equalsIgnoreCase(SmtpInstruction.AUTH)) {
+        if (StringUtil.startsIgnoreCaseWith(msg, SmtpInstruction.AUTH)) {
             log.info("auth");
             return handleAuth(bis, bos, msg);
         } else {
@@ -215,10 +214,7 @@ public class SocketHandler implements Runnable{
 
     private boolean handleData(BufferedInputStream bis, BufferedOutputStream bos) {
         String msg = MailSendUtil.extractMessage(bis);
-        if (msg.length() >= SmtpInstruction.DATA.length() &&
-        msg.substring(0, SmtpInstruction.DATA.length()).equalsIgnoreCase(
-                SmtpInstruction.DATA
-        )) {
+        if (StringUtil.startsIgnoreCaseWith(msg, SmtpInstruction.DATA)) {
             // TODO : init data receive task
             MailSendUtil.sendMessage(bos, SmtpResponseState.START_SEND + " End data with <CR><LF>.<CR><LF>");
             // begin receive data task
@@ -238,8 +234,7 @@ public class SocketHandler implements Runnable{
 
     private boolean handleQuit(BufferedInputStream bis, BufferedOutputStream bos) {
         String msg = MailSendUtil.extractMessage(bis);
-        if (msg.length() >= SmtpInstruction.QUIT.length() &&
-        msg.substring(0, SmtpInstruction.QUIT.length()).equalsIgnoreCase(SmtpInstruction.QUIT)) {
+        if (StringUtil.startsIgnoreCaseWith(msg, SmtpInstruction.QUIT)) {
             MailSendUtil.sendMessage(bos, SmtpResponseState.PROCESSING + " QUIT");
             return true;
         }

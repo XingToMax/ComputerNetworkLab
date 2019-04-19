@@ -11,6 +11,8 @@ import lombok.Data;
  */
 @Data
 public class MailBean {
+    private final String DEFAULT_CHARSET = "UTF-8";
+
     private String from;
     private String to;
     private String user;
@@ -18,6 +20,7 @@ public class MailBean {
     private String content;
     private String subject;
     private String contentType;
+    private String charset = DEFAULT_CHARSET;
     private boolean isHtml;
     private boolean isUrgent;
 

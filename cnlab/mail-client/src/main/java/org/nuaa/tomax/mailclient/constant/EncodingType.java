@@ -15,6 +15,4 @@ public class EncodingType {
     public final static String CONTENT_TRANSFER_ENCODING_7BIT = "7bit";
     public final static String CONTENT_TRANSFER_ENCODING_QUOTED_PRINTABLE = "quoted-printable";
 
-
-
 }

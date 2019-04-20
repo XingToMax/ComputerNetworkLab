@@ -16,6 +16,11 @@ import java.net.Socket;
  */
 @Log
 public class MailSendUtil {
+    /**
+     * use output stream to send data and append \r\n after
+     * @param bos output stream
+     * @param message data message
+     */
     public static void sendMessage(BufferedOutputStream bos, String message) {
         try {
             bos.write((message + "\r\n").getBytes());
@@ -25,6 +30,11 @@ public class MailSendUtil {
         }
     }
 
+    /**
+     * extract data from input stream
+     * @param bis input stream
+     * @return data
+     */
     public static String extractMessage(BufferedInputStream bis) {
         byte[] buffer = new byte[1024];
         StringBuilder builder = new StringBuilder();
@@ -35,14 +45,6 @@ public class MailSendUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        int len = -1;
-//        try {
-//            while ((len = bis.read(buffer)) > 0) {
-//                builder.append(new String(buffer, 0, len));
-//            }
-//        } catch (IOException e) {
-//            log.info("extract message from input stream error");
-//        }
         String msg = builder.toString().trim();
         log.info("msg : " + msg + "(" + msg.length() + ")");
         return msg;
@@ -51,5 +53,9 @@ public class MailSendUtil {
     public static String extractIpFromSocket(Socket socket) {
         // TODO : extract ip from socket
         return "";
+    }
+
+    public static int getResponseCode(BufferedInputStream bis) {
+        return Integer.parseInt(extractMessage(bis).split("\\s+")[0]);
     }
 }

@@ -2,6 +2,7 @@ package org.nuaa.tomax.mailserver.core;
 
 import lombok.extern.java.Log;
 import org.nuaa.tomax.mailserver.utils.MailSendUtil;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -17,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Version: 1.0
  */
 @Log
+@Component(value = "mailServer")
 public class MailServer {
     private SmtpServerContext context = null;
     private ServerSocket server = null;

@@ -5,22 +5,18 @@ import org.nuaa.tomax.mailserver.core.MailServer;
 import org.nuaa.tomax.mailserver.core.SmtpServerContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication
 @Log
 public class MailServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MailServerApplication.class, args);
-
-        MailServer server = null;
+        ApplicationContext applicationContext = SpringApplication.run(MailServerApplication.class, args);
+        SmtpServerContext context = (SmtpServerContext) applicationContext.getBean("smtpServerContext");
+        MailServer server = (MailServer) applicationContext.getBean("mailServer", context);
 
         try {
-            SmtpServerContext context = new SmtpServerContext(
-                    "localhost", 8081, "localhost");
-
-            server = new MailServer(context);
-
             server.start();
         } catch (Exception e) {
             log.info("error: " + e.getMessage());

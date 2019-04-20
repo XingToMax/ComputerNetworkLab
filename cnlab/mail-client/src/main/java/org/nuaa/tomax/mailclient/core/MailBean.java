@@ -28,6 +28,7 @@ public class MailBean {
     private boolean isHtml;
     private boolean isUrgent;
     private List<File> attachments;
+    private String data;
 
     public MailBean() {
         attachments = new ArrayList<>();
@@ -51,6 +52,11 @@ public class MailBean {
 
     public MailBean addAttachment(File file) {
         this.attachments.add(file);
+        return this;
+    }
+
+    public MailBean addData(String data) {
+        this.data = data;
         return this;
     }
 

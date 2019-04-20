@@ -8,18 +8,13 @@ import org.nuaa.tomax.mailclient.constant.SmtpResponseState;
 import org.nuaa.tomax.mailclient.utils.Base64Wrapper;
 import org.nuaa.tomax.mailclient.utils.StringUtil;
 
-import javax.naming.directory.InitialDirContext;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @Author: ToMax
@@ -58,25 +53,11 @@ public class Sender {
      * charset
      */
     private final static String CHARSET = Charset.defaultCharset().displayName();
-    /**
-     * dns记录查询上下文
-     */
-    private static InitialDirContext dnsContext;
 
     /**
      * smtp服务器地址
      */
     private String smtp;
-
-    static {
-        try {
-            dnsContext = new InitialDirContext(new Hashtable<String, String>() {{
-                put("java.naming.factory.initial","com.sun.jndi.dns.DnsContextFactory");
-            }});
-        } catch (NamingException e) {
-            e.printStackTrace();
-        }
-    }
 
     public Sender(String smtp) {
         if (smtp == null) {
@@ -111,7 +92,7 @@ public class Sender {
                 try {
                     // begin connect
                     log.info("begin to connect to stmp server(" + smtp + ")");
-                    socket = new Socket(smtp, PORT);
+                    socket = new Socket("localhost", PORT);
                     in = socket.getInputStream();
                     out = socket.getOutputStream();
 
@@ -256,9 +237,9 @@ public class Sender {
             sendMessage(bos, "");
             // TODO : data send to be optimizeed
             byte[] dataBuffer = (mail.getContent() != null ? mail.getContent() : "").getBytes();
-            for (int k = 0; k < dataBuffer.length; k += 54) {
+            for (int k = 0; k < dataBuffer.length; k += 1024) {
                 sendMessage(bos, Base64Wrapper.encode(
-                        new String(dataBuffer, k, Math.min(dataBuffer.length - k, 54))
+                        new String(dataBuffer, k, Math.min(dataBuffer.length - k, 1024))
                 ));
             }
 
@@ -266,7 +247,7 @@ public class Sender {
             if (mail.ifNeedBoundary()) {
                 RandomAccessFile attachment = null;
 
-                dataBuffer = new byte[54];
+                dataBuffer = new byte[1024];
 
                 try {
                     for (File file : mail.getAttachments()) {
@@ -281,9 +262,11 @@ public class Sender {
                                 fileName + "\"");
                         sendMessage(bos, "Content-Transfer-Encoding: base64");
 
-                        int len = 54;
-                        while (len == 54) {
-                            len = attachment.read(dataBuffer, 0, 54);
+                        // send an empty line, then send data
+                        sendMessage(bos, "");
+                        int len = 1024;
+                        while (len == 1024) {
+                            len = attachment.read(dataBuffer, 0, 1024);
                             if (len < 0) {
                                 break;
                             }
@@ -345,40 +328,6 @@ public class Sender {
         }
 
         return messages;
-    }
-
-    /**
-     * 通过url获取主机地址
-     * @param url 目标url
-     * @return 主机地址
-     */
-    public static List<String> queryDomain(String url) {
-        NamingEnumeration records = null;
-        try {
-            records = dnsContext.getAttributes(url, new String[]{"MX"}).getAll();
-            if (records.hasMore()) {
-                url = records.next().toString();
-                url = url.substring(url.indexOf(": ") + 2);
-                String[] addressList = url.split(",");
-                return Arrays.stream(addressList).
-                        map(String::trim)
-                        .sorted(Comparator.reverseOrder())
-                        .map(s -> s.split("\\s+")[1])
-                        .collect(Collectors.toList());
-            }
-            records = dnsContext.getAttributes(url, new String[]{"a"}).getAll();
-            if (records.hasMore()) {
-                url = records.next().toString();
-                url = url.substring(url.indexOf(": ") + 2).replace(" ","");
-                return Arrays.stream(url.split(",")).collect(Collectors.toList());
-            }
-
-            return Collections.singletonList(url);
-        } catch (NamingException e) {
-            // TODO : 错误待处理
-            log.info(url + " query error");
-            return Collections.emptyList();
-        }
     }
 
     public static String extractHostFromEmailAddress(String url) {

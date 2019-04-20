@@ -19,14 +19,6 @@ import java.util.stream.IntStream;
  * @Date: Created in 2019/4/12 14:25
  */
 public class SenderTest {
-    static void testQueryDomain() {
-        Sender.queryDomain("tomax.xin").forEach(System.out::println);
-        Sender.queryDomain("163.com").forEach(System.out::println);
-        Sender.queryDomain("qq.com").forEach(System.out::println);
-        Sender.queryDomain("localhost").forEach(System.out::println);
-
-//        Sender.queryDomain("http:// 127.0.0.1").forEach(System.out::println);
-    }
 
     static void testExtractHostFromEmailAddress() {
         System.out.println(Sender.extractHostFromEmailAddress("hello@localhost"));
@@ -52,15 +44,15 @@ public class SenderTest {
 //
 //        testExtractHostFromEmailAddress();
 //        checkStartsIgnoreCaseWith();
-        Sender sender = new Sender("localhost");
-        String encodeUser = Base64Wrapper.encode("tomax");
+        Sender sender = new Sender("tomax.xin");
+        String encodeUser = Base64Wrapper.encode("0");
         String encodePwd = Base64Wrapper.encode("tomax1111");
 
-        MailBean mail = new MailBean("tomax@localhost", "1121584497@qq.com",
-                Base64Wrapper.encode("hello"), "hello", "base64",
+        MailBean mail = new MailBean("0@tomax.xin", "1121584497@qq.com",
+                "hello", "hello", "base64",
                 false, false)
                 .updateAuthInfo(encodeUser, encodePwd)
-                .addAttachment(new File("/Users/tomax/study/error.txt"))
+//                .addAttachment(new File("/Users/tomax/study/error.txt"))
                 .addAttachment(new File("/Users/tomax/work/blog/myblogs/README.md"));
         sender.send(mail);
     }

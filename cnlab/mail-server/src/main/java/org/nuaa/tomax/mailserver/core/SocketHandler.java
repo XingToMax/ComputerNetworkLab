@@ -9,6 +9,8 @@ import org.nuaa.tomax.mailserver.utils.StringUtil;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Name: SocketHandler
@@ -32,6 +34,18 @@ public class SocketHandler implements Runnable{
      * 向其他邮件服务器转发
      */
     private final static int REMOTE_SEND_MODE = 3;
+
+    /**
+     * 处理该mode的handler的名称映射
+     */
+    private final static Map<Integer, String> MODE_TO_NAME = new HashMap<Integer, String>() {{
+        // 对应将数据发送到本地(即保存到本地)
+        put(LOCAL_RECEIVE_MODE, "localSend");
+        // 对应其他服务器发送来的，需要保存到本地
+        put(REMOTE_RECEIVE_MODE, "localReceive");
+        // 对应要将数据发送到其他服务器
+        put(REMOTE_SEND_MODE, "forward");
+    }};
 
     /**
      * 未登录
@@ -218,7 +232,21 @@ public class SocketHandler implements Runnable{
             // TODO : init data receive task
             MailSendUtil.sendMessage(bos, SmtpResponseState.START_SEND + " End data with <CR><LF>.<CR><LF>");
             // begin receive data task
-            readData(bis, bos);
+            String data = readData(bis, bos);
+            if (data == null) {
+                return false;
+            }
+            mail.setData(data);
+            // forward or store in local
+            boolean result = context.getDataHandlerFactory().handle(
+                    MODE_TO_NAME.get(mail.getMode()), mail
+            );
+            if (result) {
+                log.info("forward data success");
+            }
+
+            // TODO : check result
+
             return handleQuit(bis, bos);
 
         }
@@ -244,24 +272,24 @@ public class SocketHandler implements Runnable{
         return false;
     }
 
-    private boolean localSmtpStorage() {
-        return false;
-    }
-
-    private boolean forwardMail() {
-        return false;
-    }
-
-    private void readData(BufferedInputStream bis, BufferedOutputStream bos) {
+    private String readData(BufferedInputStream bis, BufferedOutputStream bos) {
+        StringBuilder data = new StringBuilder();
         byte[] buffer = new byte[1024];
+        // count data length, avoid data overflow
+        int countLen = 0;
         int len = 0;
         try {
             while ((len = bis.read(buffer)) > 0) {
+                countLen += len;
+
+                // TODO : check data overflow (use count data)
+
                 String msg = new String(buffer, 0, len);
-                log.info(msg);
+                data.append(msg);
                 if (msg.trim().endsWith(".")) {
+                    parseData(data.toString());
                     MailSendUtil.sendMessage(bos, SmtpResponseState.REQUEST_FINISH + " OK");
-                    return;
+                    return data.toString();
                 }
             }
         } catch (IOException e) {
@@ -269,6 +297,12 @@ public class SocketHandler implements Runnable{
         }
         // data content error
         MailSendUtil.sendMessage(bos, SmtpResponseState.DATA_INVALID + " exists invalid data");
+        return null;
+    }
+
+    private void parseData(String data) {
+        // TODO : check data
+        System.out.println(data);
     }
 
 }

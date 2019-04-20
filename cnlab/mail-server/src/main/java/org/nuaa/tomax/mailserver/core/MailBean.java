@@ -12,9 +12,10 @@ import lombok.Data;
 @Data
 public class MailBean {
     private String user;
+    private String password;
     private String from;
     private String to;
-    private byte[] data;
+    private String data;
     private String hostName;
     private int mode = -1;
 }

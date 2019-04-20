@@ -1,6 +1,6 @@
 package org.nuaa.tomax.mailclient.repository;
 
-import org.nuaa.tomax.mailserver.entity.UserEntity;
+import org.nuaa.tomax.mailclient.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

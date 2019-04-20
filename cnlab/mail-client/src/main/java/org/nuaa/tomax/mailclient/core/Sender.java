@@ -38,7 +38,7 @@ public class Sender {
     /**
      * 网络超时限制
      */
-    private final static int TIMEOUT = 10000;
+    private final static int TIMEOUT = 50000;
     /**
      * 邮箱格式校验器
      */

@@ -117,33 +117,30 @@ public class ForwardMailDataHandler implements IDataHandler {
         // TODO : choose right from address
         String mf = "0@tomax.xin";
         MailSendUtil.sendMessage(bos, SmtpInstruction.MAIL_FROM + ":<" + mf + ">");
-        MailSendUtil.extractMessage(bis);
-//        if (MailSendUtil.getResponseCode(bis) != SmtpResponseState.REQUEST_FINISH) {
-//            log.info("from error");
-//            return false;
-//        }
+        if (MailSendUtil.getResponseCode(bis) != SmtpResponseState.REQUEST_FINISH) {
+            log.info("from error");
+            return false;
+        }
         return to(mail, bis, bos);
     }
 
     private boolean to(MailBean mail, BufferedInputStream bis, BufferedOutputStream bos) {
         log.info("begin to stmp server");
         MailSendUtil.sendMessage(bos, SmtpInstruction.MAIL_TO + ":<" + mail.getTo() + ">");
-        MailSendUtil.extractMessage(bis);
-//        if (MailSendUtil.getResponseCode(bis) != SmtpResponseState.REQUEST_FINISH) {
-//            log.info("to error");
-//            return false;
-//        }
+        if (MailSendUtil.getResponseCode(bis) != SmtpResponseState.REQUEST_FINISH) {
+            log.info("to error");
+            return false;
+        }
         return data(mail, bis, bos);
     }
 
     private boolean data(MailBean mail, BufferedInputStream bis, BufferedOutputStream bos) {
         log.info("begin data smtp server");
         MailSendUtil.sendMessage(bos, SmtpInstruction.DATA);
-        MailSendUtil.extractMessage(bis);
-//        if (MailSendUtil.getResponseCode(bis) != SmtpResponseState.START_SEND) {
-//            log.info("data error");
-//            return false;
-//        }
+        if (MailSendUtil.getResponseCode(bis) != SmtpResponseState.START_SEND) {
+            log.info("data error");
+            return false;
+        }
 
         // TODO : send to be optimized
         byte[] buffer = mail.getData().getBytes();
@@ -153,11 +150,10 @@ public class ForwardMailDataHandler implements IDataHandler {
         } catch (IOException e) {
             log.info("send data error");
         }
-        MailSendUtil.extractMessage(bis);
-//        if (MailSendUtil.getResponseCode(bis) != SmtpResponseState.REQUEST_FINISH) {
-//            log.info("send data error");
-//            return false;
-//        }
+        if (MailSendUtil.getResponseCode(bis) != SmtpResponseState.REQUEST_FINISH) {
+            log.info("send data error");
+            return false;
+        }
 
         return quit(mail, bis, bos);
     }

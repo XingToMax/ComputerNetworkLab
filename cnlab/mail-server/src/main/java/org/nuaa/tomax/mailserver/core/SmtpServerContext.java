@@ -1,6 +1,7 @@
 package org.nuaa.tomax.mailserver.core;
 
 import lombok.extern.java.Log;
+import org.nuaa.tomax.mailserver.service.DatabaseService;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -19,13 +20,14 @@ public class SmtpServerContext {
     private final String host;
 
     private final DataHandlerFactory dataHandlerFactory;
+    private final DatabaseService databaseService;
 
-
-    public SmtpServerContext(Environment environment, DataHandlerFactory dataHandlerFactory) {
+    public SmtpServerContext(Environment environment, DataHandlerFactory dataHandlerFactory, DatabaseService databaseService) {
         this.smtp = environment.getProperty("mail.server.smtp", "");
         this.port = Integer.parseInt(environment.getProperty("mail.server.port", ""));
         this.host = environment.getProperty("mail.server.host", "");
         this.dataHandlerFactory = dataHandlerFactory;
+        this.databaseService = databaseService;
     }
 
     public String getSmtp() {
@@ -42,5 +44,9 @@ public class SmtpServerContext {
 
     public DataHandlerFactory getDataHandlerFactory() {
         return this.dataHandlerFactory;
+    }
+
+    public DatabaseService getDatabaseService() {
+        return this.databaseService;
     }
 }

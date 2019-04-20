@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 public class LocalSendMailDataHandler implements IDataHandler {
     @Override
     public boolean handle(MailBean mail) {
-        return false;
+
+        return true;
     }
 }

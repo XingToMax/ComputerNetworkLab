@@ -126,7 +126,7 @@ public class SocketHandler implements Runnable{
 
     private boolean handleAuth(BufferedInputStream bis, BufferedOutputStream bos, String msg) {
         // check auth
-        MailSendUtil.sendMessage(bos, SmtpResponseState.AUTH_RESPONSE + " OK");
+        MailSendUtil.sendMessage(bos, SmtpResponseState.AUTH_RESPONSE  + " " + Base64Wrapper.encode("username"));
         return handleAuthUsername(bis, bos);
     }
 
@@ -135,14 +135,14 @@ public class SocketHandler implements Runnable{
         String username = Base64Wrapper.decode(msg);
         // TODO : check username exists
         mail.setUser(username);
-        MailSendUtil.sendMessage(bos, SmtpResponseState.AUTH_RESPONSE + " " + Base64Wrapper.encode("username: "));
+        MailSendUtil.sendMessage(bos, SmtpResponseState.AUTH_RESPONSE + " " + Base64Wrapper.encode("password"));
         return handleAuthPassword(bis, bos);
     }
 
     private boolean handleAuthPassword(BufferedInputStream bis, BufferedOutputStream bos) {
         String password = MailSendUtil.extractMessage(bis);
         // TODO : check password
-        MailSendUtil.sendMessage(bos, SmtpResponseState.AUTH_ACCESS + " " + Base64Wrapper.encode("password: "));
+        MailSendUtil.sendMessage(bos, SmtpResponseState.AUTH_ACCESS + " OK");
         // update mode to login success mode
         mail.setMode(LOCAL_RECEIVE_MODE);
         return handleFrom(bis, bos, MailSendUtil.extractMessage(bis));

@@ -40,7 +40,7 @@ public class SmtpResponseState {
     public final static int COMMAND_UN_EXECUTABLE = 550;
 
     /**
-     * auth login 响应
+     * auth login 响应, 表示等待输入
      */
     public final static int AUTH_RESPONSE = 334;
 

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:include="head::head_link" />
+</head>
+
+<body>
+    <div class="x-body layui-anim layui-anim-up">
+        <blockquote class="layui-elem-quote">欢迎管理员, 当前时间:
+            <span id="now_time">2018-04-25 20:50:53</span></blockquote>
+        <fieldset class="layui-elem-field">
+            <legend>平台数据一览</legend>
+            <div class="layui-field-box">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-body">
+                            <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside" lay-arrow="none" style="width: 100%; height: 90px;">
+                                <div carousel-item="">
+                                    <ul class="layui-row layui-col-space10 layui-this">
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h3>博文数</h3>
+                                                <p>
+                                                    <cite id="blog-count">3</cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h3>图片数</h3>
+                                                <p>
+                                                    <cite id="img-count">5</cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h3>资源数</h3>
+                                                <p>
+                                                    <cite id="resource-count">13</cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h3>累计访问次数</h3>
+                                                <p>
+                                                    <cite id="visit-count">102</cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h3>分类数</h3>
+                                                <p>
+                                                    <cite id="cls-count">42</cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h3>标签数</h3>
+                                                <p>
+                                                    <cite id="label-count">42</cite></p>
+                                            </a>
+                                        </li>
+                                        <li class="layui-col-xs2">
+                                            <a href="javascript:;" class="x-admin-backlog-body">
+                                                <h3>评论数</h3>
+                                                <p>
+                                                    <cite>42</cite></p>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="layui-elem-field">
+            <legend>系统参数</legend>
+            <div class="layui-field-box">
+                <table class="layui-table">
+                    <tbody>
+                        <tr>
+                            <th>主页</th>
+                            <td>tomax.xin
+                                <a href="http://tomax.xin" class='x-a' target="_blank">访问首页</a></td>
+                        </tr>
+                        <tr>
+                            <th>操作系统</th>
+                            <td>windows server 2012</td>
+                        </tr>
+                        <tr>
+                            <th>Web框架</th>
+                            <td>Spring boot</td>
+                        </tr>
+                        <tr>
+                            <th>持久化框架</th>
+                            <td>Spring Data Jpa + Hibernate</td>
+                        </tr>
+                        <tr>
+                            <th>缓存系统</th>
+                            <td>Redis</td>
+                        </tr>
+                        <tr>
+                            <th>UI框架</th>
+                            <td>layui</td>
+                        </tr>
+                        <tr>
+                            <th>MySQL版本</th>
+                            <td>5.6.15</td>
+                        </tr>
+                        <tr>
+                            <th>Markdown插件</th>
+                            <td>Editor.md</td>
+                        </tr>
+                        <tr>
+                            <th>Javascript框架</th>
+                            <td>JQuery</td>
+                        </tr>
+                        <tr>
+                            <th>图标库</th>
+                            <td>iconfont</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </fieldset>
+        <blockquote class="layui-elem-quote layui-quote-nm">感谢jquery,layui,echarts,editormd 本系统由x-admin提供技术支持。</blockquote>
+    </div>
+</body>
+    <th:block th:include="foot::foot_js" />
+    <script th:inline="javascript">
+        update_current_time()
+        setInterval(update_current_time, 500)
+
+        function update_current_time() {
+            var current_date = new Date()
+            var time_content = ''
+            var year = current_date.getFullYear()
+            var month = current_date.getMonth() + 1
+            var day = current_date.getDate()
+            var hour = current_date.getHours() + ':'
+            if (hour.length < 3) hour = '0' + hour
+            var minute = current_date.getMinutes() + ':'
+            if (minute.length < 3) minute = '0' + minute
+            var second = current_date.getSeconds()
+            time_content += year + '-' + month + '-' + day + ' ' + hour + minute + (second < 10 ? '0' + second : second)
+            $('#now_time').html(time_content)
+        }
+
+        $.get(HOST + '/admin/system/countData', result => {
+            $('#blog-count').html(result.data.blogCount)
+            $('#img-count').html(result.data.imgCount)
+            $('#resource-count').html(result.data.resourceCount)
+            $('#cls-count').html(result.data.clsCount)
+            $('#label-count').html(result.data.labelCount)
+        })
+    </script>
+</html>

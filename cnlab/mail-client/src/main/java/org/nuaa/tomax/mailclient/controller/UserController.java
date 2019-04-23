@@ -28,7 +28,7 @@ public class UserController {
         Response response = userService.signin(username, password);
 
         if (response.getCode() == Response.SUCCESS_CODE) {
-            session.setAttribute(session.getId(), username);
+            session.setAttribute("username", username);
         }
 
         return response;

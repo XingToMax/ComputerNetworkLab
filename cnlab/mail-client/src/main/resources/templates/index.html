@@ -13,7 +13,7 @@
         </div>
         <ul class="layui-nav right" lay-filter="">
             <li class="layui-nav-item">
-                <a>Tomax<span class="layui-nav-more"></span></a>
+                <a><span id="username"></span><span class="layui-nav-more"></span></a>
                 <ul class="layui-nav-child">
                     <li><a onclick="logout()">退出</a></li>
                 </ul>
@@ -74,9 +74,12 @@
     <!-- 底部结束 -->
 </body>
     <th:block th:include="foot::foot_js" />
-    <script>
+    <script th:inline="javascript">
+        var username = [[${session.username}]]
+        $('#username').val(username)
         function logout() {
             window.location.href = HOST + '/logout'
         }
     </script>
+
 </html>

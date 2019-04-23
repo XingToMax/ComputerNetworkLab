@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>登录</title>
+    <th:block th:include="head::head_link" />
+    <link rel="stylesheet" th:href="@{/css/bootstrap/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/button.css}">
+    <link rel="stylesheet" th:href="@{/css/user/user_normal.css}">
+</head>
+<body>
+<div>
+    <div class="form-signin">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-md-5"><h2>注册</h2></div>
+                    <div class="col-md-5"></div>
+                    <div class="col-md-2"><br>
+                        <button class="button button-primary button-circle" onclick="go_to_signin()">登录</button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <label for="username">用户名</label>
+                <input type="text" id="username" class="form-control" placeholder="Username" name="username" required autofocus>
+                <br>
+                <label for="password">密码</label>
+                <input type="password" id="password" class="form-control" placeholder="Password" name="password" required>
+                <br>
+                <label for="conPass">确认密码</label>
+                <input type="password" id="conPass" class="form-control" placeholder="Repeat Password" name="conPass" required>
+                <br>
+                <button type="button" class="btn btn-lg btn-primary btn-block" id="signupB">注册</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<th:block th:include="foot::foot_js" />
+<script type="text/javascript" th:src="@{/js/user/signup.js}"></script>
+</html>

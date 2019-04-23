@@ -27,7 +27,7 @@ public class ViewController {
 
     @GetMapping("/signup")
     public String signup() {
-        return "register";
+        return "signup";
     }
 
     @GetMapping("/logout")

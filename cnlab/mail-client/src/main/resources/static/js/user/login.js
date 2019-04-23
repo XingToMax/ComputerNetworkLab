@@ -5,22 +5,18 @@ $("#loginBtn").on('click',function () {
     var password = $('#password').val()
     var param = {'username':username, 'password':password}
     layer.load(2)
-    $.post('/admin/user/login', param, function (result) {
+    $.post('/user/login', param, function (result) {
         layer.closeAll('loading')
         if (result.code === 0) {
-            window.location.href = '/admin/page/admin-index'
+            window.location.href = '/page/index'
         } else {
             layer.alert(result.msg, {icon: 2});
         }
     })
 })
 
-function enter(event) {
-    var button = $("#loginBtn")
-    if (event.keyCode === 13) {
-        button.click();
-        event.returnValue = false;
-    }
+function go_to_signup() {
+    window.location.href = "/signup"
 }
 
 

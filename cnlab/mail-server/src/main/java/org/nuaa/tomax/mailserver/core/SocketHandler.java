@@ -3,6 +3,7 @@ package org.nuaa.tomax.mailserver.core;
 import lombok.extern.java.Log;
 import org.nuaa.tomax.mailserver.constant.SmtpInstruction;
 import org.nuaa.tomax.mailserver.constant.SmtpResponseState;
+import org.nuaa.tomax.mailserver.entity.MailEntity;
 import org.nuaa.tomax.mailserver.utils.Base64Wrapper;
 import org.nuaa.tomax.mailserver.utils.MailSendUtil;
 import org.nuaa.tomax.mailserver.utils.StringUtil;
@@ -236,16 +237,20 @@ public class SocketHandler implements Runnable{
             if (data == null) {
                 return false;
             }
+
+            // TODO : check data
             mail.setData(data);
             // forward or store in local
             boolean result = context.getDataHandlerFactory().handle(
                     MODE_TO_NAME.get(mail.getMode()), mail
             );
             if (result) {
-                log.info("forward data success");
+                // store data
+                context.getDatabaseService().saveMail(mail.toMail());
+                log.info("store data success");
+            } else {
+                log.info("data handle error");
             }
-
-            // TODO : check result
 
             return handleQuit(bis, bos);
 

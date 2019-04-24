@@ -1,6 +1,7 @@
 package org.nuaa.tomax.mailserver.core;
 
 import lombok.Data;
+import org.nuaa.tomax.mailserver.entity.MailEntity;
 
 /**
  * @Name: MailBean
@@ -18,4 +19,14 @@ public class MailBean {
     private String data;
     private String hostName;
     private int mode = -1;
+
+    public MailEntity toMail() {
+        MailEntity entity = new MailEntity();
+        entity.setData(data);
+        entity.setFromMail(from);
+        entity.setToMail(to);
+        entity.setMailType(mode);
+        entity.setProp("");
+        return entity;
+    }
 }

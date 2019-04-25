@@ -1,5 +1,6 @@
 package org.nuaa.tomax.mailclient.service;
 
+import org.nuaa.tomax.mailclient.core.MailBean;
 import org.nuaa.tomax.mailclient.entity.MailDataEntity;
 import org.nuaa.tomax.mailclient.entity.Response;
 
@@ -11,7 +12,7 @@ import org.nuaa.tomax.mailclient.entity.Response;
  * @Version: 1.0
  */
 public interface IMailService {
-    Response sendMail(MailDataEntity mail);
+    Response sendMail(MailBean mail);
 
     Response getRecieveMailList(String username);
 

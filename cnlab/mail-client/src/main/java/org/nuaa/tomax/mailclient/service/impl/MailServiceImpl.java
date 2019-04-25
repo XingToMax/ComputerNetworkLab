@@ -1,8 +1,14 @@
 package org.nuaa.tomax.mailclient.service.impl;
 
-import org.nuaa.tomax.mailclient.entity.MailDataEntity;
+import org.nuaa.tomax.mailclient.core.MailBean;
+import org.nuaa.tomax.mailclient.core.Sender;
 import org.nuaa.tomax.mailclient.entity.Response;
+import org.nuaa.tomax.mailclient.entity.UserEntity;
+import org.nuaa.tomax.mailclient.repository.IMailRepository;
+import org.nuaa.tomax.mailclient.repository.IUserRepository;
 import org.nuaa.tomax.mailclient.service.IMailService;
+import org.nuaa.tomax.mailclient.utils.Base64Wrapper;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,9 +21,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class MailServiceImpl implements IMailService {
 
+    private final IMailRepository mailRepository;
+    private final IUserRepository userRepository;
+    private final String host;
+
+    public MailServiceImpl(IMailRepository mailRepository, IUserRepository userRepository, Environment environment) {
+        this.mailRepository = mailRepository;
+        this.userRepository = userRepository;
+        this.host = environment.getProperty("mail.host");
+    }
+
+
     @Override
-    public Response sendMail(MailDataEntity mail) {
-        return null;
+    public Response sendMail(MailBean mail) {
+        // TODO : set username、 password
+        UserEntity user = userRepository.findUserEntityByUsername(mail.getUser());
+        mail.setUser(Base64Wrapper.encode(user.getUsername()));
+        mail.setPassword(user.getPassword());
+        mail.setFrom(user.getUsername() + "@" + host);
+        Sender sender = new Sender(host);
+        if (sender.send(mail).size() != 0) {
+            return new Response(Response.SERVER_ERROR_CODE, "mail send error");
+        }
+        return new Response(Response.SUCCESS_CODE, "mail send success");
     }
 
     @Override

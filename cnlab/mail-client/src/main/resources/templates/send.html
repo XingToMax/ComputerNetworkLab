@@ -13,43 +13,132 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">收件人</label>
                 <div class="layui-input-block">
-                    <input type="text" name="to_mail" autocomplete="off" placeholder="请输入收件人地址" class="layui-input">
+                    <input type="text" name="to_mail" id="to_mail" autocomplete="off" placeholder="请输入收件人地址" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label">抄送</label>
                 <div class="layui-input-block">
-                    <input type="text" name="cc" autocomplete="off" placeholder="抄送" class="layui-input">
+                    <input type="text" name="cc" id="cc" autocomplete="off" placeholder="抄送" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label">主题</label>
                 <div class="layui-input-block">
-                    <input type="text" name="subject" autocomplete="off" placeholder="请输入邮件主题" class="layui-input">
+                    <input type="text" id="subject" name="subject" autocomplete="off" placeholder="请输入邮件主题" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item layui-form-text">
                 <label class="layui-form-label">正文</label>
                 <div class="layui-input-block">
-                    <textarea placeholder="请输入正文内容" class="layui-textarea" style="min-height: 200px;"></textarea>
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <button class="layui-btn" type="button">添加附件</button>
-            </div>
-            <div class="layui-form-item layui-form-text">
-                <label class="layui-form-label">正文</label>
-                <div class="layui-input-block">
-
+                    <textarea placeholder="请输入正文内容" id="content" class="layui-textarea" style="min-height: 200px;"></textarea>
                 </div>
             </div>
 
+            <div class="layui-upload">
+                <button type="button" class="layui-btn layui-btn-normal" id="attachList">添加附件</button>
+                <div class="layui-upload-list">
+                    <table class="layui-table">
+                        <thead>
+                        <tr><th>文件名</th>
+                            <th>大小</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr></thead>
+                        <tbody id="demoList"></tbody>
+                    </table>
+                </div>
+            </div>
 
             <div class="layui-form-item">
-                <button class="layui-btn" type="button">发送</button>
+                <button class="layui-btn" type="button" id="sendAction">发送</button>
             </div>
         </form>
     </div>
 </body>
 <th:block th:include="foot::foot_js" />
+<script th:inline="javascript">
+    var username = [[${session.username}]]
+    $('#username').val(username)
+
+    layui.use('upload', function() {
+        var $ = layui.jquery
+            , upload = layui.upload;
+
+        var demoListView = $('#demoList')
+            ,uploadListIns = upload.render({
+            elem: '#attachList'
+            ,url: '/mail/upload/attachment'
+            ,accept: 'file'
+            ,multiple: true
+            ,auto: false
+            ,bindAction: '#sendAction'
+            ,choose: function(obj){
+                var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
+                //读取本地文件
+                obj.preview(function(index, file, result){
+                    var tr = $(['<tr id="upload-'+ index +'">'
+                        ,'<td>'+ file.name +'</td>'
+                        ,'<td>'+ (file.size/1014).toFixed(1) +'kb</td>'
+                        ,'<td>等待上传</td>'
+                        ,'<td>'
+                        ,'<button class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>'
+                        ,'<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
+                        ,'</td>'
+                        ,'</tr>'].join(''));
+
+                    //单个重传
+                    tr.find('.demo-reload').on('click', function(){
+                        obj.upload(index, file);
+                    });
+
+                    //删除
+                    tr.find('.demo-delete').on('click', function(){
+                        delete files[index]; //删除对应的文件
+                        tr.remove();
+                        uploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
+                    });
+
+                    demoListView.append(tr);
+                });
+            }
+            ,done: function(res, index, upload){
+                if(res.code === 0){ //上传成功
+                    var tr = demoListView.find('tr#upload-'+ index)
+                        ,tds = tr.children();
+                    tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
+                    tds.eq(3).html(''); //清空操作
+
+                    delete this.files[index]; //删除文件队列已经上传成功的文件
+                    var sum = demoListView.find('tr').length;
+                    if (Object.keys(this.files).length === 0) {
+                        var to_mail = $('#to_mail').val()
+                        var cc = $('#cc').val()
+                        var subject = $('#subject').val()
+                        var content = $('#content').val()
+
+                        var param = {
+                            to : to_mail,
+                            cc : cc,
+                            subject : subject,
+                            content : content
+                        }
+
+                        $.post('/mail/send', param, function (res) {
+                            console.log(res)
+                        })
+                    }
+                    return
+                }
+                this.error(index, upload);
+            }
+            ,error: function(index, upload){
+                var tr = demoListView.find('tr#upload-'+ index)
+                    ,tds = tr.children();
+                tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
+                tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
+            }
+        });
+    });
+</script>
 </html>

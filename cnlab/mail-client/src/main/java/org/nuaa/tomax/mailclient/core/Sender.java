@@ -6,6 +6,7 @@ import org.nuaa.tomax.mailclient.constant.MimeType;
 import org.nuaa.tomax.mailclient.constant.SmtpInstruction;
 import org.nuaa.tomax.mailclient.constant.SmtpResponseState;
 import org.nuaa.tomax.mailclient.utils.Base64Wrapper;
+import org.nuaa.tomax.mailclient.utils.HostsProxy;
 import org.nuaa.tomax.mailclient.utils.StringUtil;
 
 import java.io.*;
@@ -69,9 +70,9 @@ public class Sender {
 
     public List<SendMessage> send(MailBean mail) {
         // check from
-//        if (!MAIL_PATTERN.matcher(from).find()) {
-//            throw new IllegalArgumentException("param from(" + from + ") is not a valid email address");
-//        }
+        if (!MAIL_PATTERN.matcher(mail.getFrom()).find()) {
+            throw new IllegalArgumentException("param from(" + mail.getFrom() + ") is not a valid email address");
+        }
         if (!MAIL_PATTERN.matcher(mail.getTo()).find()) {
             throw new IllegalArgumentException("param to(" + mail.getTo() + ") is not a valid email address");
         }
@@ -92,7 +93,7 @@ public class Sender {
                 try {
                     // begin connect
                     log.info("begin to connect to stmp server(" + smtp + ")");
-                    socket = new Socket("localhost", PORT);
+                    socket = new Socket("localhost", HostsProxy.queryLocalhostPort(smtp));
                     in = socket.getInputStream();
                     out = socket.getOutputStream();
 

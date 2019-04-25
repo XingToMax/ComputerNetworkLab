@@ -28,6 +28,7 @@ public class MailBean {
     private boolean isHtml;
     private boolean isUrgent;
     private List<File> attachments;
+    private String cc;
     private String data;
 
     public MailBean() {

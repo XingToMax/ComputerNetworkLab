@@ -42,6 +42,7 @@ public class ViewController {
     private static final List<String> ADMIN_PAGE_LIST = new ArrayList<String>(){{
         add("index");
         add("welcome");
+        add("send");
     }};
 
     /**

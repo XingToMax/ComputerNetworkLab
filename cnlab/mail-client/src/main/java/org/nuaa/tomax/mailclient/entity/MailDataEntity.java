@@ -3,6 +3,7 @@ package org.nuaa.tomax.mailclient.entity;
 import lombok.Data;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,7 +20,15 @@ public class MailDataEntity {
     private String subject;
     private String cc;
     private String content;
+    private String time;
     private File[] attachments;
     private List<String> fileNameList;
     private List<String> fileTypeList;
+    private List<String> filePathList;
+
+    public MailDataEntity() {
+        fileNameList = new ArrayList<>();
+        fileTypeList = new ArrayList<>();
+        filePathList = new ArrayList<>();
+    }
 }

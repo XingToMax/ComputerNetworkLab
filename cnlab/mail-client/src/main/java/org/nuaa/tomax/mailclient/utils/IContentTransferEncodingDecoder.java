@@ -31,9 +31,20 @@ public interface IContentTransferEncodingDecoder {
                 // base64 encoding type
                 put("base64", Base64Wrapper::decode);
 
+                put("Base64", Base64Wrapper::decode);
                 // base64 encoding type
                 put("BASE64", Base64Wrapper::decode);
 
+                put("ascii", (src) -> src);
+
+                put("Ascii", (src) -> src);
+
+                put("ASCII", (src) -> src);
+
+                put("quoted-printable", (src) -> {
+                    // TODO : finish QP
+                    return src;
+                });
                 // TODO : add other decoder
             }};
 }

@@ -171,6 +171,7 @@ public class MimeType {
         put("trm", "application/x-msterminal");
         put("tsv", "text/tab-separated-values");
         put("txt", "text/plain");
+        put("md", "text/plain");
         put("uls", "text/iuls");
         put("ustar", "application/x-ustar");
         put("vcf", "text/x-vcard");

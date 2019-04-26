@@ -78,19 +78,19 @@ public class SenderTest {
 //
 //        testExtractHostFromEmailAddress();
 //        checkStartsIgnoreCaseWith();
-//        Sender sender = new Sender("tomax.xin");
-//        String encodeUser = Base64Wrapper.encode("0");
-//        String encodePwd = Base64Wrapper.encode("tomax1111");
-//
-//        MailBean mail = new MailBean("0@tomax.xin", "1121584497@qq.com",
-//                "hello", "hello", "base64",
-//                false, false)
-//                .updateAuthInfo(encodeUser, encodePwd)
-////                .addAttachment(new File("/Users/tomax/study/error.txt"))
-//                .addAttachment(new File("/Users/tomax/work/blog/myblogs/README.md"));
-//        sender.send(mail);
+        Sender sender = new Sender("tomax.xin");
+        String encodeUser = Base64Wrapper.encode("1");
+        String encodePwd = Base64Wrapper.encode("tomax1111");
 
-        testDataParser();
+        MailBean mail = new MailBean("1@toyer.xyz", "2@tomax.xin",
+                "hello", "hello", "base64",
+                false, false)
+                .updateAuthInfo(encodeUser, encodePwd)
+//                .addAttachment(new File("/Users/tomax/study/error.txt"))
+                .addAttachment(new File("/Users/tomax/work/blog/myblogs/README.md"));
+        sender.send(mail);
+
+//        testDataParser();
     }
 
 }

@@ -3,6 +3,7 @@ package org.nuaa.tomax.mailserver.core;
 import lombok.extern.java.Log;
 import org.nuaa.tomax.mailserver.constant.SmtpInstruction;
 import org.nuaa.tomax.mailserver.constant.SmtpResponseState;
+import org.nuaa.tomax.mailserver.utils.HostsProxy;
 import org.nuaa.tomax.mailserver.utils.MailSendUtil;
 import org.springframework.stereotype.Component;
 
@@ -44,13 +45,22 @@ public class ForwardMailDataHandler implements IDataHandler {
 
     @Override
     public boolean handle(MailBean mail) {
-        List<String> addressList = queryDomain(extractHostFromEmailAddress(mail.getTo()));
+        int port = 25;
+        String host = extractHostFromEmailAddress(mail.getTo());
+        List<String> addressList = queryDomain(host);
+        if (host.equals("tomax.xin") || host.equals("toyer.xyz")) {
+            addressList = new ArrayList<>();
+            addressList.add("127.0.0.1");
+            port = HostsProxy.queryLocalhostPort(host);
+        }
         Socket socket = null;
         BufferedInputStream bis = null;
         BufferedOutputStream bos = null;
+
         try {
             for (String address : addressList) {
-                socket = new Socket(address, 25);
+                socket = new Socket(address, port);
+                log.info("connect to : " + address + "(" + port + ")");
                 bis = new BufferedInputStream(socket.getInputStream());
                 bos = new BufferedOutputStream(socket.getOutputStream());
 
@@ -206,5 +216,6 @@ public class ForwardMailDataHandler implements IDataHandler {
     public static String extractHostFromEmailAddress(String url) {
         return url.split("@")[1];
     }
+
 
 }

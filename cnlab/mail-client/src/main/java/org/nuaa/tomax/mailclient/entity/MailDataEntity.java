@@ -23,6 +23,7 @@ public class MailDataEntity {
     private String content;
     private String time;
     private File[] attachments;
+    private int mailType;
     private List<String> fileNameList;
     private List<String> fileTypeList;
     private List<String> filePathList;

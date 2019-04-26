@@ -38,6 +38,7 @@ public class MailDataParser {
         mail.setFrom(src.getFromMail());
         mail.setTo(src.getToMail());
         mail.setTime(src.getTime().toString());
+        mail.setMailType(src.getMailType());
         List<String> head = getHead(src.getData());
         parseHead(head, paramMap);
         // set subject
@@ -58,6 +59,7 @@ public class MailDataParser {
         mail.setId(src.getId());
         mail.setFrom(src.getFromMail());
         mail.setTo(src.getToMail());
+        mail.setMailType(src.getMailType());
         // TODO : time type wait to be modified
         mail.setTime(src.getTime().toString());
 
@@ -87,7 +89,7 @@ public class MailDataParser {
             if (paramMap.containsKey("content-transfer-encoding")) {
                 body = IContentTransferEncodingDecoder.CONTENT_TRANSFER_ENCODER
                         .get(paramMap.get("content-transfer-encoding"))
-                        .decode(body);
+                        .decode(body.trim());
             }
             mail.setContent(body);
         }

@@ -43,17 +43,9 @@ public class ViewController {
         add("index");
         add("welcome");
         add("send");
-    }};
-
-    /**
-     * model page
-     */
-    private static final List<String> ADMIN_MODEL_PAGE = new ArrayList<String>() {{
-        add("image_view");
-        add("create_folder");
-        add("create_class");
-        add("blog_edit");
-        add("resource_view");
+        add("mail-send");
+        add("mail-receive");
+        add("mail-read");
     }};
 
     @GetMapping("/page/{page}")
@@ -66,13 +58,5 @@ public class ViewController {
 //        return ADMIN_PAGE_LIST.contains(page) ?
 //                session.getAttribute("User") != null ? page : "login" :
 //                "error/404";
-    }
-
-    @GetMapping("/page/model/{page}")
-    public String modelPage(@PathVariable(name = "page") String page, HttpSession session, Long id, Model model) {
-        model.addAttribute("id", id);
-        return ADMIN_MODEL_PAGE.contains(page) ?
-                session.getAttribute("User") != null ? "model/" + page : "login" :
-                "error/404";
     }
 }

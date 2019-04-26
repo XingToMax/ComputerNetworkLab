@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:include="head::head_link" />
+</head>
+<body>
+<div style="padding-left: 40px; padding-right: 40px; padding-bottom: 20px;">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+        <legend>收件箱</legend>
+    </fieldset>
+    <div>
+        <table id="receive-list" lay-filter="receive-list"></table>
+    </div>
+</div>
+</body>
+<th:block th:include="foot::foot_js" />
+<script type="text/html" id="mail-type">
+    {{# if(d.mailType == 4) { }}
+    已读
+    {{# } else { }}
+    未读
+    {{# } }}
+</script>
+<script type="text/html" id="edit-bar">
+    <a class="layui-btn layui-btn-xs" lay-event="view"><i class="iconfont">&#xe6e6;</i></a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete"><i class="iconfont">&#xe69d;</i></a>
+</script>
+
+<script th:inline="javascript">
+    var username = [[${session.username}]]
+    $('#username').val(username)
+
+    layui.use(['table', 'form'], function () {
+        let table = layui.table;
+        let form = layui.form;
+
+        let receive = table.render({
+            elem: '#receive-list'
+            ,height: 600
+            ,width: 1000
+            ,url: HOST + '/mail/receiveMailList/'
+            ,page: true
+            ,cols: [[
+                {type:'checkbox',fixed:'left',width:40}
+                ,{field: 'from', title: '发信人', width:180}
+                ,{field: 'to', title: '收信人', width:180}
+                ,{field: 'subject', title: '主题', width:200}
+                ,{field: 'mailType', title: '状态', templet: '#mail-type', width: 100}
+                ,{field: 'time', title: '时间', width: 200}
+                // ,{field: 'time', title: '时间', width: 200}
+                ,{title: '操作',width:100, align:'center', toolbar: '#edit-bar'}
+            ]]
+            ,response: {
+                dataName : 'array'
+            }
+            ,loader : true
+            ,text: {
+                none: '暂无相关数据'
+            }
+        });
+
+        //监听工具条
+        table.on('tool(receive-list)', (obj) => {
+            let data = obj.data;
+            let layEvent = obj.event;
+            let tr = obj.tr;
+            if(layEvent === 'delete') {
+                deleteRequest('/mail/mail/' + data.id, {}, function (res) {
+                    layer.msg('删除成功')
+                    receive.reload()
+                })
+
+            } else if(layEvent === 'view') {
+                window.location.href = '/page/mail-read?id=' + data.id
+            }
+        });
+
+});
+</script>
+</html>

@@ -48,24 +48,15 @@ public class SenderTest {
         src.setFromMail("0@tomax.xin");
         src.setToMail("1121584497@qq.com");
         src.setTime(new Timestamp(System.currentTimeMillis()));
-        src.setData("subject:hello\r\n" +
-                "from:0@tomax.xin\r\n" +
+        src.setData("subject:hello, from tomax\r\n" +
+                "from:tomax@tomax.xin\r\n" +
                 "to:1121584497@qq.com\r\n" +
                 "MIME-Version: 1.0\r\n" +
-                "Content-Type: multipart/mixed; BOUNDARY=\"Tomax=MGEwNTIzYjhiMzBkNjNmNWQ5M2EyYmYzMmE5YzE3YjE=Boundary\"\r\n" +
-                "X-Priority: 3\r\n" +
-                "--Tomax=MGEwNTIzYjhiMzBkNjNmNWQ5M2EyYmYzMmE5YzE3YjE=Boundary\r\n" +
                 "Content-Type: text/plain; charset=\"UTF-8\"\r\n" +
                 "Content-Transfer-Encoding: base64\r\n" +
+                "X-Priority: 3\r\n" +
                 "\r\n" +
-                "aGVsbG8=\r\n" +
-                "--Tomax=MGEwNTIzYjhiMzBkNjNmNWQ5M2EyYmYzMmE5YzE3YjE=Boundary\r\n" +
-                "Content-Type: application/octet-stream; name=\"UkVBRE1FLm1k\"\r\n" +
-                "Content-Disposition: attachment; filename=\"UkVBRE1FLm1k\"\r\n" +
-                "Content-Transfer-Encoding: base64\r\n" +
-                "\r\n" +
-                "I215YmxvZ3MK\r\n" +
-                "--Tomax=MGEwNTIzYjhiMzBkNjNmNWQ5M2EyYmYzMmE5YzE3YjE=Boundary--\r\n" +
+                "aGVsbG8gd29ybGQh\r\n" +
                 ".\r\n");
 
         MailDataEntity mail = MailDataParser.parse(src);
@@ -78,19 +69,19 @@ public class SenderTest {
 //
 //        testExtractHostFromEmailAddress();
 //        checkStartsIgnoreCaseWith();
-        Sender sender = new Sender("tomax.xin");
-        String encodeUser = Base64Wrapper.encode("1");
-        String encodePwd = Base64Wrapper.encode("tomax1111");
+//        Sender sender = new Sender("tomax.xin");
+//        String encodeUser = Base64Wrapper.encode("1");
+//        String encodePwd = Base64Wrapper.encode("tomax1111");
+//
+//        MailBean mail = new MailBean("1@toyer.xyz", "2@tomax.xin",
+//                "hello", "hello", "base64",
+//                false, false)
+//                .updateAuthInfo(encodeUser, encodePwd)
+////                .addAttachment(new File("/Users/tomax/study/error.txt"))
+//                .addAttachment(new File("/Users/tomax/work/blog/myblogs/README.md"));
+//        sender.send(mail);
 
-        MailBean mail = new MailBean("1@toyer.xyz", "2@tomax.xin",
-                "hello", "hello", "base64",
-                false, false)
-                .updateAuthInfo(encodeUser, encodePwd)
-//                .addAttachment(new File("/Users/tomax/study/error.txt"))
-                .addAttachment(new File("/Users/tomax/work/blog/myblogs/README.md"));
-        sender.send(mail);
-
-//        testDataParser();
+        testDataParser();
     }
 
 }

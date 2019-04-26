@@ -56,26 +56,41 @@ public class MailServiceImpl implements IMailService {
 
     @Override
     public Response getRecieveMailList(String username, int page, int limit) {
-        return null;
+        return new Response<MailDataEntity>(
+                Response.SUCCESS_CODE,
+                "get data list success",
+                parse(mailRepository.findMailEntitiesByToMail(username + "@" + host, limit, (page - 1) * limit))
+        );
     }
 
     @Override
     public Response getSendMailList(String username, int page, int limit) {
-        return null;
+        return new Response<MailDataEntity>(
+                Response.SUCCESS_CODE,
+                "get data list success",
+                parse(mailRepository.findMailEntitiesByFromMail(username + "@" + host, limit, (page - 1) * limit))
+        );
     }
 
     @Override
     public Response getMailById(long id) {
-        return null;
+        updateMailRead(id);
+        return new Response<MailDataEntity>(
+                Response.SUCCESS_CODE,
+                "get data success",
+                MailDataParser.parse(mailRepository.findById(id).orElseGet(MailEntity::new))
+        );
     }
 
     @Override
     public Response removeMail(long id) {
-        return null;
+        mailRepository.deleteById(id);
+        return new Response(Response.SUCCESS_CODE, "delete mail success");
     }
 
     @Override
     public Response updateMailRead(long id) {
+        mailRepository.updateMailType(4, id);
         return null;
     }
 

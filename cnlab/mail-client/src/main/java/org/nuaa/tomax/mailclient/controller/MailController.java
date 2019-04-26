@@ -43,13 +43,15 @@ public class MailController {
     }
 
     @GetMapping("/sendMailList")
-    public Response getSendMailList() {
-        return null;
+    public Response getSendMailList(int page, int limit, HttpSession session) {
+        String username = (String) session.getAttribute("username");
+        return mailService.getSendMailList(username, page, limit);
     }
 
     @GetMapping("/receiveMailList")
-    public Response getReceiveList() {
-        return null;
+    public Response getReceiveList(int page, int limit, HttpSession session) {
+        String username = (String) session.getAttribute("username");
+        return mailService.getRecieveMailList(username, page, limit);
     }
 
     @PostMapping("/upload/attachment")
@@ -66,4 +68,21 @@ public class MailController {
 
         return new Response(Response.SUCCESS_CODE, "upload file success");
     }
+
+    @DeleteMapping("/mail/{id}")
+    public Response deleteMail(@PathVariable(name = "id")Long id) {
+        return mailService.removeMail(id);
+    }
+
+    @PatchMapping("/mail/{id}")
+    public Response updateMailState(@PathVariable(name = "id")Long id) {
+        return mailService.updateMailRead(id);
+    }
+
+    @GetMapping("/mail/{id}")
+    public Response getMailData(@PathVariable(name = "id") Long id) {
+        return mailService.getMailById(id);
+    }
+
+
 }

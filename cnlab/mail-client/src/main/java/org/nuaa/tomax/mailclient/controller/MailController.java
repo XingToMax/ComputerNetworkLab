@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * @Name: MailController
@@ -39,11 +38,7 @@ public class MailController {
     @PostMapping("/send")
     public Response send(MailBean mail, HttpSession session) {
         String username = (String) session.getAttribute("username");
-        List<File> attachments = AttachmentCache.getAttachmentList(username);
         mail.setUser(username);
-        for (File file : attachments) {
-            log.info(file.getName());
-        }
         return mailService.sendMail(mail);
     }
 

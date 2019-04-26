@@ -223,6 +223,7 @@ public class Sender {
 
             // send content
             if (mail.ifNeedBoundary()) {
+                sendMessage(bos, "");
                 sendMessage(bos, "--" + BOUNDARY);
 
                 if (mail.isHtml()) {

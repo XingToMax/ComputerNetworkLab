@@ -14,9 +14,13 @@ import org.nuaa.tomax.mailclient.entity.Response;
 public interface IMailService {
     Response sendMail(MailBean mail);
 
-    Response getRecieveMailList(String username);
+    Response getRecieveMailList(String username, int page, int limit);
 
-    Response getSendMailList(String username);
+    Response getSendMailList(String username, int page, int limit);
 
     Response removeMail(long id);
+
+    Response updateMailRead(long id);
+
+    Response getMailById(long id);
 }

@@ -55,11 +55,53 @@
             </div>
         </form>
     </div>
+    <button id="sendAttachAction" style="display: none"></button>
 </body>
 <th:block th:include="foot::foot_js" />
 <script th:inline="javascript">
     var username = [[${session.username}]]
     $('#username').val(username)
+
+    function sendMsg() {
+        var to_mail = $('#to_mail').val()
+        var cc = $('#cc').val()
+        var subject = $('#subject').val()
+        var content = $('#content').val()
+
+        var param = {
+            to : to_mail,
+            cc : cc,
+            subject : subject,
+            content : content
+        }
+
+        $.post('/mail/send', param, function (res) {
+            // success
+            if (res.code === 0) {
+                layer.open({
+                    title: '信息'
+                    ,content: '发送成功'
+                    ,btn: ['再写一封', '返回首页']
+                    ,yes : function (index, layero) {
+                        window.location.href = '/page/send'
+                    }
+                    ,btn2 : function (index, layero) {
+                        window.location.href = '/page/welcome'
+                    }
+                });
+            } else {
+                layer.alert('邮件发送失败')
+            }
+        })
+    }
+
+    $('#sendAction').click(function () {
+        if ($('tr').length > 1) {
+            $('#sendAttachAction').click()
+        } else {
+            sendMsg()
+        }
+    })
 
     layui.use('upload', function() {
         var $ = layui.jquery
@@ -72,7 +114,7 @@
             ,accept: 'file'
             ,multiple: true
             ,auto: false
-            ,bindAction: '#sendAction'
+            ,bindAction: '#sendAttachAction'
             ,choose: function(obj){
                 var files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
                 //读取本地文件
@@ -112,21 +154,7 @@
                     delete this.files[index]; //删除文件队列已经上传成功的文件
                     var sum = demoListView.find('tr').length;
                     if (Object.keys(this.files).length === 0) {
-                        var to_mail = $('#to_mail').val()
-                        var cc = $('#cc').val()
-                        var subject = $('#subject').val()
-                        var content = $('#content').val()
-
-                        var param = {
-                            to : to_mail,
-                            cc : cc,
-                            subject : subject,
-                            content : content
-                        }
-
-                        $.post('/mail/send', param, function (res) {
-                            console.log(res)
-                        })
+                        sendMsg()
                     }
                     return
                 }

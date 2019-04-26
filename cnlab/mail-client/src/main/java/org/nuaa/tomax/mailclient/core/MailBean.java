@@ -62,6 +62,6 @@ public class MailBean {
     }
 
     public boolean ifNeedBoundary() {
-        return attachments.size() > 0;
+        return attachments != null && attachments.size() > 0;
     }
 }

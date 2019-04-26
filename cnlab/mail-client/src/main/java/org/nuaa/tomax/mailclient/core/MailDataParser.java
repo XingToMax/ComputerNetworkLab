@@ -31,10 +31,31 @@ public class MailDataParser {
         put("Content-Disposition", "default");
     }};
 
+    public static MailDataEntity lightParse(MailEntity src) {
+        Map<String, String> paramMap = new HashMap<>();
+        MailDataEntity mail = new MailDataEntity();
+        mail.setId(src.getId());
+        mail.setFrom(src.getFromMail());
+        mail.setTo(src.getToMail());
+        mail.setTime(src.getTime().toString());
+        List<String> head = getHead(src.getData());
+        parseHead(head, paramMap);
+        // set subject
+        if (paramMap.containsKey("subject")) {
+            mail.setSubject(paramMap.get("subject"));
+        }
+
+        // set cc
+        if (paramMap.containsKey("cc")) {
+            mail.setCc(paramMap.get("cc"));
+        }
+        return mail;
+    }
+
     public static MailDataEntity parse(MailEntity src) {
         Map<String, String> paramMap = new HashMap<>();
         MailDataEntity mail = new MailDataEntity();
-
+        mail.setId(src.getId());
         mail.setFrom(src.getFromMail());
         mail.setTo(src.getToMail());
         // TODO : time type wait to be modified

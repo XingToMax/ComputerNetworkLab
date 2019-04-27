@@ -3,6 +3,7 @@ package org.nuaa.tomax.mailclient.service;
 import org.nuaa.tomax.mailclient.core.MailBean;
 import org.nuaa.tomax.mailclient.entity.MailDataEntity;
 import org.nuaa.tomax.mailclient.entity.Response;
+import org.springframework.core.io.Resource;
 
 /**
  * @Name: IMailService
@@ -23,4 +24,6 @@ public interface IMailService {
     Response updateMailRead(long id);
 
     Response getMailById(long id);
+
+    Resource downloadFile(String filename);
 }

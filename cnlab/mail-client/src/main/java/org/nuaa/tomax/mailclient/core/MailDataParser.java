@@ -1,9 +1,11 @@
 package org.nuaa.tomax.mailclient.core;
 
 import org.nuaa.tomax.mailclient.constant.MimeType;
+import org.nuaa.tomax.mailclient.entity.FileEntity;
 import org.nuaa.tomax.mailclient.entity.MailDataEntity;
 import org.nuaa.tomax.mailclient.entity.MailEntity;
 import org.nuaa.tomax.mailclient.utils.Base64Wrapper;
+import org.nuaa.tomax.mailclient.utils.FileUtil;
 import org.nuaa.tomax.mailclient.utils.IContentTransferEncodingDecoder;
 import org.nuaa.tomax.mailclient.utils.StringUtil;
 
@@ -53,7 +55,7 @@ public class MailDataParser {
         return mail;
     }
 
-    public static MailDataEntity parse(MailEntity src) {
+    public static MailDataEntity parse(MailEntity src, String savePath) {
         Map<String, String> paramMap = new HashMap<>();
         MailDataEntity mail = new MailDataEntity();
         mail.setId(src.getId());
@@ -80,7 +82,7 @@ public class MailDataParser {
         )) {
             // mixed branch
             List<String> parts = getBodyParts(body, getBoundary(paramMap));
-            parseBodyParts(parts, mail, paramMap);
+            parseBodyParts(parts, mail, paramMap, savePath);
 
         } else {
             // only body part
@@ -89,7 +91,7 @@ public class MailDataParser {
             if (paramMap.containsKey("content-transfer-encoding")) {
                 body = IContentTransferEncodingDecoder.CONTENT_TRANSFER_ENCODER
                         .get(paramMap.get("content-transfer-encoding"))
-                        .decode(body.trim());
+                        .decode(body.replaceAll("\r", "").replaceAll("\n", ""));
             }
             mail.setContent(body);
         }
@@ -115,7 +117,7 @@ public class MailDataParser {
         }
     }
 
-    private static void parseBodyParts(List<String> body, MailDataEntity mail, Map<String, String> paramMap) {
+    private static void parseBodyParts(List<String> body, MailDataEntity mail, Map<String, String> paramMap, String savePath) {
         for (String part : body) {
             List<String> head = getHead(part);
             Map<String, String> params = new HashMap<>();
@@ -135,8 +137,16 @@ public class MailDataParser {
             String data = getBody(part);
             // check transfer encoding
             if (params.containsKey("content-transfer-encoding")) {
-                data = IContentTransferEncodingDecoder.CONTENT_TRANSFER_ENCODER
-                        .get(params.get("content-transfer-encoding")).decode(data.trim());
+//                String[] lines = data.split("\n");
+//                StringBuilder dataBuilder = new StringBuilder();
+//                for (String line : lines) {
+//                    dataBuilder.append(IContentTransferEncodingDecoder.CONTENT_TRANSFER_ENCODER
+//                            .get(params.get("content-transfer-encoding")).decode(data.replaceAll("\r", "").replaceAll("\n", "")));
+//                }
+//                data = dataBuilder.toString();
+//                data = IContentTransferEncodingDecoder.CONTENT_TRANSFER_ENCODER
+//                        .get(params.get("content-transfer-encoding")).decode(data.replaceAll("\r", "").replaceAll("\n", ""));
+                // TODO : data decode
             }
 
             if (params.containsKey("content-disposition")) {
@@ -146,15 +156,18 @@ public class MailDataParser {
                     String[] cells = deposition.split(";");
                     String type = cells[0].trim();
                     String fileName = Base64Wrapper.decode(cells[1].split("\"")[1].trim());
-
-                    mail.getFileNameList().add(fileName);
-                    mail.getFileTypeList().add(fileName.split("\\.")[1]);
-
-
+                    FileEntity file = new FileEntity();
+                    file.setName(fileName);
+                    file.setSize((data.getBytes().length));
+                    file.setType(fileName.split("\\.")[1]);
+                    FileUtil.saveFile(data, savePath + fileName);
+                    mail.getFileEntities().add(file);
                 } else {
                     mail.setContent(data);
                 }
             } else {
+                data = IContentTransferEncodingDecoder.CONTENT_TRANSFER_ENCODER
+                        .get(params.get("content-transfer-encoding")).decode(data.replaceAll("\r", "").replaceAll("\n", ""));
                 mail.setContent(data);
             }
         }

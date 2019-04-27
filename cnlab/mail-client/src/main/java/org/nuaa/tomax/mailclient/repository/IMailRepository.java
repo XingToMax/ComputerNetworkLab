@@ -15,9 +15,9 @@ import java.util.List;
  * @Version: 1.0
  */
 public interface IMailRepository extends JpaRepository<MailEntity, Long> {
-    @Query(value = "select * from mail where to_mail = ?1 order by time limit ?2 offset ?3", nativeQuery = true)
+    @Query(value = "select * from mail where to_mail = ?1 order by time desc limit ?2 offset ?3", nativeQuery = true)
     List<MailEntity> findMailEntitiesByToMail(String to, int page, int offset);
-    @Query(value = "select * from mail where from_mail = ?1 order by time limit ?2 offset ?3", nativeQuery = true)
+    @Query(value = "select * from mail where from_mail = ?1 order by time desc limit ?2 offset ?3", nativeQuery = true)
     List<MailEntity> findMailEntitiesByFromMail(String from, int page, int offset);
 
     @Modifying

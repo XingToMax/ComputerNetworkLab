@@ -24,6 +24,7 @@ public class MailDataEntity {
     private String time;
     private File[] attachments;
     private int mailType;
+    private List<FileEntity> fileEntities;
     private List<String> fileNameList;
     private List<String> fileTypeList;
     private List<String> filePathList;
@@ -32,5 +33,6 @@ public class MailDataEntity {
         fileNameList = new ArrayList<>();
         fileTypeList = new ArrayList<>();
         filePathList = new ArrayList<>();
+        fileEntities = new ArrayList<>();
     }
 }

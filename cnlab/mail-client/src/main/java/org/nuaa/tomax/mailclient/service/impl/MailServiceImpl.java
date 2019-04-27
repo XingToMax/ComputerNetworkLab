@@ -13,9 +13,12 @@ import org.nuaa.tomax.mailclient.repository.IUserRepository;
 import org.nuaa.tomax.mailclient.service.IMailService;
 import org.nuaa.tomax.mailclient.utils.Base64Wrapper;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.FileUrlResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,11 +36,14 @@ public class MailServiceImpl implements IMailService {
     private final IMailRepository mailRepository;
     private final IUserRepository userRepository;
     private final String host;
-
+    private final String savePath;
+    private final String tmpPath;
     public MailServiceImpl(IMailRepository mailRepository, IUserRepository userRepository, Environment environment) {
         this.mailRepository = mailRepository;
         this.userRepository = userRepository;
         this.host = environment.getProperty("mail.host");
+        this.savePath = environment.getProperty("mail.attachments.cache.save.path");
+        this.tmpPath = environment.getProperty("mail.attachments.cache.path");
     }
 
     @Override
@@ -78,7 +84,7 @@ public class MailServiceImpl implements IMailService {
         return new Response<MailDataEntity>(
                 Response.SUCCESS_CODE,
                 "get data success",
-                MailDataParser.parse(mailRepository.findById(id).orElseGet(MailEntity::new))
+                MailDataParser.parse(mailRepository.findById(id).orElseGet(MailEntity::new), savePath)
         );
     }
 
@@ -88,9 +94,22 @@ public class MailServiceImpl implements IMailService {
         return new Response(Response.SUCCESS_CODE, "delete mail success");
     }
 
+
+
     @Override
     public Response updateMailRead(long id) {
         mailRepository.updateMailType(4, id);
+        return null;
+    }
+
+    @Override
+    public Resource downloadFile(String filename) {
+        // TODO : use savePath instead
+        try {
+            return new FileUrlResource(tmpPath + filename);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

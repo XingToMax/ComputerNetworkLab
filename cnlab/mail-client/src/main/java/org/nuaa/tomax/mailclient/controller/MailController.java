@@ -6,13 +6,21 @@ import org.nuaa.tomax.mailclient.core.MailBean;
 import org.nuaa.tomax.mailclient.entity.Response;
 import org.nuaa.tomax.mailclient.service.IMailService;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * @Name: MailController
@@ -84,5 +92,27 @@ public class MailController {
         return mailService.getMailById(id);
     }
 
+    @GetMapping("/download/file")
+    public ResponseEntity<Resource> downloadFile(String filename, HttpServletRequest request) throws UnsupportedEncodingException {
+        // TODO : same with the function in reource controller , optimize it by add file upload and download controller
+        Resource resource = mailService.downloadFile(filename);
+        if (resource == null) {
+            return new ResponseEntity<Resource>(HttpStatus.NOT_FOUND);
+        }
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + URLEncoder.encode(resource.getFilename(), "UTF-8") + "\"")
+                .body(resource);
+    }
 }

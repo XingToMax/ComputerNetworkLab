@@ -4,10 +4,7 @@ import org.nuaa.tomax.mailclient.core.AttachmentCache;
 import org.nuaa.tomax.mailclient.core.MailBean;
 import org.nuaa.tomax.mailclient.core.MailDataParser;
 import org.nuaa.tomax.mailclient.core.Sender;
-import org.nuaa.tomax.mailclient.entity.MailDataEntity;
-import org.nuaa.tomax.mailclient.entity.MailEntity;
-import org.nuaa.tomax.mailclient.entity.Response;
-import org.nuaa.tomax.mailclient.entity.UserEntity;
+import org.nuaa.tomax.mailclient.entity.*;
 import org.nuaa.tomax.mailclient.repository.IMailRepository;
 import org.nuaa.tomax.mailclient.repository.IUserRepository;
 import org.nuaa.tomax.mailclient.service.IMailService;
@@ -111,6 +108,21 @@ public class MailServiceImpl implements IMailService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public Response countData(String username) {
+        String mail = username + "@" + host;
+        CountDataEntity dataEntity = new CountDataEntity(
+                mailRepository.countByToMail(mail),
+                mailRepository.countByFromMail(mail),
+                mailRepository.countByToMailAndMailType(mail, 4)
+        );
+        return new Response<CountDataEntity>(
+                Response.SUCCESS_CODE,
+                "get data success",
+                dataEntity
+        );
     }
 
     private List<MailDataEntity> parse(List<MailEntity> srcList) {

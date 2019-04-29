@@ -217,5 +217,7 @@ public class ForwardMailDataHandler implements IDataHandler {
         return url.split("@")[1];
     }
 
-
+    public static void main(String[] args) {
+        queryDomain("qq.com").forEach(System.out::println);
+    }
 }

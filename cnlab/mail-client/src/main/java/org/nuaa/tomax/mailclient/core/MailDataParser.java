@@ -155,7 +155,8 @@ public class MailDataParser {
                     String deposition = params.get("content-disposition");
                     String[] cells = deposition.split(";");
                     String type = cells[0].trim();
-                    String fileName = Base64Wrapper.decode(cells[1].split("\"")[1].trim());
+//                    String fileName = Base64Wrapper.decode(cells[1].split("\"")[1].trim());
+                    String fileName = cells[1].split("\"")[1].trim();
                     FileEntity file = new FileEntity();
                     file.setName(fileName);
                     file.setSize((data.getBytes().length));

@@ -257,9 +257,12 @@ public class Sender {
                         attachment = new RandomAccessFile(file, "r");
 
                         sendMessage(bos, "--" + BOUNDARY);
+//                        sendMessage(bos, "Content-Type: " +
+//                                MimeType.getMimeType(StringUtil.getFileSuffix(fileName)) +
+//                                "; name=\"" + (fileName = Base64Wrapper.encode(fileName)) + "\"");
                         sendMessage(bos, "Content-Type: " +
                                 MimeType.getMimeType(StringUtil.getFileSuffix(fileName)) +
-                                "; name=\"" + (fileName = Base64Wrapper.encode(fileName)) + "\"");
+                                "; name=\"" + fileName + "\"");
                         sendMessage(bos, "Content-Disposition: attachment; filename=\"" +
                                 fileName + "\"");
                         sendMessage(bos, "Content-Transfer-Encoding: base64");

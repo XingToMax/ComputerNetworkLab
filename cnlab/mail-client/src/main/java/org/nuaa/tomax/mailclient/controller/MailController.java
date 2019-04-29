@@ -115,4 +115,10 @@ public class MailController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + URLEncoder.encode(resource.getFilename(), "UTF-8") + "\"")
                 .body(resource);
     }
+
+    @GetMapping("/count/data")
+    public Response getCountData(HttpSession session) {
+        String username = (String) session.getAttribute("username");
+        return mailService.countData(username);
+    }
 }

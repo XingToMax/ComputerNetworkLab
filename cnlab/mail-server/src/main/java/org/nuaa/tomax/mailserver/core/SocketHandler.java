@@ -121,6 +121,7 @@ public class SocketHandler implements Runnable{
             return handleAuth(bis, bos, msg);
         } else {
             log.info("from");
+            mail.setMode(REMOTE_RECEIVE_MODE);
             return handleFrom(bis, bos, msg);
         }
     }

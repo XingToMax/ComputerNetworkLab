@@ -24,4 +24,10 @@ public interface IMailRepository extends JpaRepository<MailEntity, Long> {
     @Query(value = "update mail set mail_type = ?1 where id = ?2", nativeQuery = true)
     void updateMailType(int mailType, long id);
 
+    int countByFromMail(String fromMail);
+
+    int countByToMail(String toMail);
+
+    @Query(value = "select count(*) from mail where to_mail = ?1 and mail_type != ?2", nativeQuery = true)
+    int countByToMailAndMailType(String toMail, int mailType);
 }

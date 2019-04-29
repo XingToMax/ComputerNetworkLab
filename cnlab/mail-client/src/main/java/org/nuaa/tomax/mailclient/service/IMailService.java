@@ -26,4 +26,6 @@ public interface IMailService {
     Response getMailById(long id);
 
     Resource downloadFile(String filename);
+
+    Response countData(String username);
 }

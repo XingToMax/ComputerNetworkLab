@@ -7,7 +7,7 @@
 <body>
     <!-- 顶部开始 -->
     <div class="container">
-        <div class="logo"><a th:href="admin-index">T-Mail</a></div>
+        <div class="logo"><a th:href="index">T-Mail</a></div>
         <div class="left_open">
             <i title="展开左侧栏" class="iconfont">&#xe699;</i>
         </div>
@@ -76,7 +76,7 @@
     <th:block th:include="foot::foot_js" />
     <script th:inline="javascript">
         var username = [[${session.username}]]
-        $('#username').val(username)
+        $('#username').html(username)
         function logout() {
             window.location.href = HOST + '/logout'
         }
